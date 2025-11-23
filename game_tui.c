@@ -1,7 +1,6 @@
 #include "game.h"
 #include "tui.h"
 
-
 #include <stdlib.h>
 
 Table alloc_score_table(wstr_t *hands, int numHands, wstr_t* playerNames, int numPlayers) {

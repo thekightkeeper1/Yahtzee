@@ -1,5 +1,5 @@
-#if !defined(GAME_H)
-#define GAME_H
+#if !defined(GAME_TUI_H)
+#define GAME_TUI_H
 
 #include <stdbool.h>
 
@@ -21,5 +21,5 @@ void free_score_table(Table t);
 wchar_t** int_array_to_wchar_array(const int nums[], wchar_t** strs, const int n, const int len);
 Game setup_game(wstr_t* playerNames, const int numPlayers);
 
-#endif // GAME_H
+#endif // GAME_TUI_H
 

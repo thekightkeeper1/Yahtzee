@@ -1,0 +1,20 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "WSL Debug C",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/a.out",
+            "cwd": "${workspaceFolder}",
+
+            "MIMode": "gdb",
+
+            "pipeTransport": {
+                "pipeProgram": "wsl",
+                "pipeArgs": [],
+                "debuggerPath": "/usr/bin/gdb"
+            }
+        }
+    ]
+}

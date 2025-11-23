@@ -5,7 +5,7 @@
 
 #include "main.h"
 #include "tui.h"
-#include "game.h"
+#include "game_tui.h"
 
 
 

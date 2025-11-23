@@ -1,8 +1,12 @@
-#include "game.h"
+/*
+* Interaction between core game logic and the TUI
+*/
+#include "game_tui.h"
 #include "tui.h"
 
 #include <stdlib.h>
 
+// alloc
 Table alloc_score_table(wstr_t *hands, int numHands, wstr_t* playerNames, int numPlayers) {
 
     const int numCols = numPlayers + 1; // To account for the score label column
@@ -10,6 +14,12 @@ Table alloc_score_table(wstr_t *hands, int numHands, wstr_t* playerNames, int nu
     int *colWidths = malloc(sizeof(int) * numCols); 
     int *cumulativeWidths = malloc(sizeof(int) * (numCols + 1));  // Cummulative widths are shifted. Always the first cell=0, and we need one extra to get the last cell=sum(widths)
     wstr_t *cellBottoms = malloc(sizeof(wstr_t) * numCols);
+
+    if (colWidths == NULL || cumulativeWidths == NULL || cellBottoms == NULL) {
+        endwin();
+        printf("There was an issue allocating memory, sorry mate.");
+        exit(1);
+    }
 
     
     // Getting the width of each player's name
@@ -30,6 +40,11 @@ Table alloc_score_table(wstr_t *hands, int numHands, wstr_t* playerNames, int nu
     // Getting the strs cached for making the horizontal border between cells
     for (int i = 0; i < numCols; i++) {
         cellBottoms[i] = malloc(sizeof(wchar_t) * (colWidths[i] + 1)); // Originally messed up parenthesis
+        if (cellBottoms[i] == NULL) {
+            endwin();
+            printf("There was an issue allocating memery, sorry mate.");
+            exit(1);
+        }
         repeat(cellBottoms[i], L'─', colWidths[i]);
     }
 

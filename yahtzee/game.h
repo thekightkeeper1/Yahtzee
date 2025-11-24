@@ -54,5 +54,5 @@ typedef struct {
 Yahtzee init_yahtzee(int numPlayers, u_int64_t isAI);
 void end_yahtzee(const Yahtzee y);
 void rollDice(Yahtzee* y);
-
+void update_ephemeral(Yahtzee* y);
 #endif // GAME_H

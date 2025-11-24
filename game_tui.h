@@ -12,8 +12,6 @@ typedef struct {
     Table scoreboardTUI;
     int numPlayers;
     int numHands;
-    bool *isAI;
-    int **scores;
 
 } Game;
 

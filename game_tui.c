@@ -112,8 +112,7 @@ Game setup_game_ui(wstr_t* playerNames, const int numPlayers) {
     game.numPlayers = numPlayers;
     game.numHands = 14;
     game.scoreboardTUI = alloc_score_table(game.handCategories, game.numHands, game.playerNames, game.numPlayers);
-    
-    
+
     return game;
 }
 

@@ -4,6 +4,9 @@
 #define NUM_INTERACTIVE_CATEGORIES 14 /* The number of scores the user can themselves choose */
 #define NUM_CATEGORIES 17 /* Same as above, but includes the total rows, and things like the bonus */
 
+#define MAX_ROLLS 3
+#define NUM_DICE 5
+
 #include <stdlib.h>
 
 typedef enum {
@@ -35,7 +38,7 @@ typedef struct {
     /* Ephemeral state for each turn */
     int* bufferScore; // The theoretical score you can get for each category between rolls
     int curPlayer;  // The index of the turn player
-    int dice[5];
+    int dice[NUM_DICE];
     int currentRoll; // Shows how many times the dice have been rolled this turn
 
 } Yahtzee;

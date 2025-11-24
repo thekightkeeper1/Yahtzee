@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <time.h>
 
 #include "game.h"
 
@@ -30,9 +31,20 @@ void end_yahtzee(const Yahtzee y) {
     free(y.bufferScore);
 }
 
-// Rolls the dice in the yahtzee game. Exits if, somehow, we are already over max dice rolls
-void rollDice(const Yahtzee y) {
-    assert(y.currentRoll < MAX_ROLLS);
+// Rolls the dice in the yahtzee game.
+void rollDice(Yahtzee* y) {
+    // Handles all dice rolling logic, including resetting locked dice if we are on 0 rolls
+    // And advancing the number of rolls
 
+    // Check we can roll, then increment
+    assert(y->currentRoll < MAX_ROLLS);  // Game driver should stop this from failing
+    y->currentRoll++;
+    if (y->currentRoll == 0) y->locked_dice = 0;
 
+    // Iterating bits of locked dice, and only rolling the correct ones
+    for (int i = 0; i < 5; i++) {
+        if (~(y->locked_dice >> i) & 0b1) { // If the bit at the ith position from the right is toggled
+            y->dice[i] = 1 + rand() % 6;
+        }
+    }
 }

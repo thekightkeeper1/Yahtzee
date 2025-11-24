@@ -29,6 +29,12 @@ typedef enum {
     YAHTZEE // Yahtzee is considered interactive, but not a required score. It's weird
 } CATEGORIES;
 
+#define DIE_1 0b00001
+#define DIE_2 0b00010
+#define DIE_3 0b00100
+#define DIE_4 0b01000
+#define DIE_5 0b10000
+
 typedef struct {
 
     /* State for the entire game */
@@ -40,11 +46,13 @@ typedef struct {
     int curPlayer;  // The index of the turn player
     int dice[NUM_DICE];
     int currentRoll; // Shows how many times the dice have been rolled this turn
+    u_int8_t locked_dice;
 
 } Yahtzee;
 
 /* Functions */
 Yahtzee init_yahtzee(int numPlayers, u_int64_t isAI);
 void end_yahtzee(const Yahtzee y);
+void rollDice(Yahtzee* y);
 
 #endif // GAME_H

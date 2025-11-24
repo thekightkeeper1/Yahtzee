@@ -1,7 +1,13 @@
 #include "tui.h"
 
 #include <assert.h>
+#include <stdlib.h>
 
+void malloc_failed() {
+    endwin();
+    printf("There was an issue allocating memory, sorry mate.\n");
+    exit(1);
+}
 
 // Repeats given wchar_t n times and returns the resultant string.
 void repeat(wchar_t* dest, const wchar_t c, const int n) {
@@ -15,7 +21,7 @@ void repeat(wchar_t* dest, const wchar_t c, const int n) {
 int maxlen(wchar_t **arr, int n) {
     int max = 0;
     for (int i = 0; i < n; i++) {
-        int len = wcslen(arr[i]);
+        const int len = (int)wcslen(arr[i]);
         if (len > max) {
             max = len;
         }
@@ -23,6 +29,66 @@ int maxlen(wchar_t **arr, int n) {
     return max;
 }
 
+// Allocates a table where the column widths are automatically determined
+// columns is the data
+// num columns is number of columns in the table
+
+Table make_autosized_table(wstr_t **columns, int numCols, int columnHeight) {
+    int *colWidths = malloc(sizeof(int) * numCols); 
+    int *cumulativeWidths = malloc(sizeof(int) * (numCols + 1));  // Cummulative widths are shifted. Always the first cell=0, and we need one extra to get the last cell=sum(widths)
+    wstr_t *cellBottoms = malloc(sizeof(wstr_t) * numCols);
+
+    if (colWidths == NULL || cumulativeWidths == NULL || cellBottoms == NULL) {
+        malloc_failed();
+        exit(1);
+    }
+
+    // Determining the width of each column
+    // We find the largest in the entire column
+    
+    for (int c = 0; c < numCols; c++)
+    {
+        colWidths[c] = maxlen(columns[c], columnHeight);
+    }
+
+    // Getting the cumulative widths
+    cumulativeWidths[0] = 0;
+    for (int i = 1; i < numCols ; i++) {
+        // Sum of previous cumulative width, plus the column we just passed, plus 1 for the right border
+        cumulativeWidths[i] = cumulativeWidths[i-1] + colWidths[i-1] + 1;
+    }
+
+    // Getting the strs cached for making the horizontal border between cells
+    for (int i = 0; i < numCols; i++) {
+        cellBottoms[i] = malloc(sizeof(wchar_t) * (colWidths[i] + 1)); // Originally messed up parenthesis
+        if (cellBottoms[i] == NULL) malloc_failed();
+        repeat(cellBottoms[i], L'─', colWidths[i]);
+    }
+
+    const Table t = {
+        .x = 0,
+        .y = 0,
+        .numCols = numCols,
+        .numRows = columnHeight,
+        .cumulativeWidths = cumulativeWidths,
+        .cellBottoms = cellBottoms,
+        .colWidths = colWidths,
+        .columnData = columns,
+    };
+    return t;
+    
+}
+
+void free_autosized_table(Table t) {
+    // Freeing the deepest stuff first, the arrays of strs
+    for (int i = 0; i < t.numCols; i++) {
+        free(t.cellBottoms[i]);
+    }
+    // Freeing all the toplevel properties
+    free(t.cellBottoms);
+    free(t.cumulativeWidths);
+    free(t.colWidths);
+}
 
 // Gets the x y position of a table cell. It returns writeable area, not where the border is
 void get_cell_pos(const int r, const int c, int* x, int* y, const Table t) {

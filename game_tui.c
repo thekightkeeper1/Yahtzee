@@ -4,6 +4,7 @@
 #include "game_tui.h"
 #include "tui.h"
 #include <stdlib.h>
+#include <threads.h>
 
 // alloc
 Table alloc_score_table(wstr_t *hands, int numHands, wstr_t* playerNames, int numPlayers) {
@@ -34,7 +35,7 @@ Table alloc_score_table(wstr_t *hands, int numHands, wstr_t* playerNames, int nu
             // Handling the label column/row
             if (c == 0) {  // hands column
                 if (r == 0) { // Corner case
-                    columns[c][r] = L"-";
+                    columns[c][r] = L"";
                     continue;
                 } else {
                     columns[c][r] = hands[r-1]; // The table has a dummy value at 0,0 => it is 1 indexed
@@ -50,7 +51,7 @@ Table alloc_score_table(wstr_t *hands, int numHands, wstr_t* playerNames, int nu
             // Allocating room for the actual string
             columns[c][r] = (wstr_t)malloc(sizeof(wchar_t) * 4); // Max yahzee score only have 4 digits + \0
 
-            wcscpy(columns[c][r], L"0");
+            wcscpy(columns[c][r], L"-");
         }
     }
 
@@ -83,8 +84,8 @@ wchar_t** int_array_to_wchar_array(const int nums[], wchar_t** strs, const int n
     
 }
 
-Game setup_game(wstr_t* playerNames, const int numPlayers) {
-    
+Game setup_game_ui(wstr_t* playerNames, const int numPlayers) {
+
     Game game;
 
     // This is the types of hands that you can win. 
@@ -110,8 +111,13 @@ Game setup_game(wstr_t* playerNames, const int numPlayers) {
     game.playerNames = playerNames;
     game.numPlayers = numPlayers;
     game.numHands = 14;
-    game.scoreboard = alloc_score_table(game.handCategories, game.numHands, game.playerNames, game.numPlayers);
+    game.scoreboardTUI = alloc_score_table(game.handCategories, game.numHands, game.playerNames, game.numPlayers);
     
     
     return game;
+}
+
+void set_score_and_update(const int c, const int r, const int value, const Table t) {
+    swprintf(t.columnData[c][r], 5, L"%d", value);
+    draw_cell_data(t, c, r, FILLED_SCORE);
 }

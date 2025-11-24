@@ -23,6 +23,13 @@ typedef struct {
     
 } Table;
 
+typedef enum {
+    EMPTY_CELL,
+    FILLED_SCORE,
+    LABEL_CELL
+} color_pair_t;
+
+
 void get_cell_pos(const int r, const int c, int* x, int* y, const Table t);
 void draw_table(Table t);
 int maxlen(wchar_t **arr, int n);
@@ -31,6 +38,10 @@ void malloc_failed();
 Table make_autosized_table(wstr_t **columns, int numCols, int columnHeight);
 void free_autosized_table(Table t);
 void draw_table_data(const Table t);
+void draw_cell_data(Table t, int c, int r, color_pair_t color);
+void test_menu(wchar_t** choices_w, int n_choices);
+
+
 
 
 #endif // TUI_H

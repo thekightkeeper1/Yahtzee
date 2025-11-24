@@ -2,6 +2,57 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#include <ncursesw/menu.h>
+
+void test_menu(wchar_t** choices_w, int n_choices) {
+
+    char **choices = malloc(sizeof(char*) * n_choices);
+    for (int i = 0; i < n_choices; i++) {
+        choices[i] = malloc(4 * wcslen(choices_w[i]));
+        wcstombs(choices[i], choices_w[i], wcslen(choices_w[i]) * 4);
+
+    }
+
+    ITEM **my_items;
+    int c;
+    MENU *my_menu;
+    int i;
+    ITEM *cur_item;
+
+    keypad(stdscr, TRUE);
+    my_items = (ITEM **)calloc(n_choices + 1, sizeof(ITEM *));
+
+    for(i = 0; i < n_choices; ++i)
+        my_items[i] = new_item(choices[i], choices[i]);
+    my_items[n_choices] = (ITEM *)NULL;
+
+    move(3, 60);
+    my_menu = new_menu((ITEM **)my_items);
+    // mvprintw(LINES - 2, 0, "F1 to Exit");
+    post_menu(my_menu);
+    refresh();
+
+    while((c = getch()) != KEY_F(1))
+    {   switch(c)
+    {	case KEY_DOWN:
+            menu_driver(my_menu, REQ_DOWN_ITEM);
+            break;
+        case KEY_UP:
+            menu_driver(my_menu, REQ_UP_ITEM);
+            break;
+    }
+    }
+
+    free_item(my_items[0]);
+    free_item(my_items[1]);
+    free_menu(my_menu);
+    for ( i = 0; i < n_choices; i++) {
+        free(choices[i]);
+    }
+    free(choices);
+    endwin();
+}
+
 
 void malloc_failed() {
     endwin();
@@ -136,7 +187,7 @@ void draw_table(const Table t) {
             // Right border
             if (col == t.numCols-1) {
                 addwstr(L"┤");  // no move b/c after drawing the bottom bar, we are exactly in place for this
-                mvaddwstr(cellY, t.cumulativeWidths[col+1], L"│");
+                mvaddwstr(cellY, t.x + t.cumulativeWidths[col+1], L"│");
             } 
 
         }
@@ -161,4 +212,17 @@ void draw_table_data(const Table t) {
             mvaddwstr(y, x, t.columnData[c][r]);
         }
     }
+}
+
+void draw_cell_data(Table t, int c, int r, color_pair_t color) {
+    int y, x;
+    get_cell_pos(r, c, &x, &y, t);
+    move(y, x);
+    // Clearing old ce
+    for (int i = 0; i < t.colWidths[c]; i++) {
+        addwstr(L" ");
+    }
+    attron(COLOR_PAIR(color));
+    mvaddwstr(y, x+1, t.columnData[c][r]);
+    attroff(COLOR_PAIR(color));
 }

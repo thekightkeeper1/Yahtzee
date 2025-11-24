@@ -1,10 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #include "game.h"
 
 Yahtzee init_yahtzee(int numPlayers, u_int64_t isAI) {
-    Yahtzee y = {
+    const Yahtzee y = {
         .numPlayers = numPlayers,
         .scores = calloc(numPlayers, sizeof(int*)),
 
@@ -29,4 +30,9 @@ void end_yahtzee(const Yahtzee y) {
     free(y.bufferScore);
 }
 
-// Rolls the dice in the yahtzee game
+// Rolls the dice in the yahtzee game. Exits if, somehow, we are already over max dice rolls
+void rollDice(const Yahtzee y) {
+    assert(y.currentRoll < MAX_ROLLS);
+
+
+}

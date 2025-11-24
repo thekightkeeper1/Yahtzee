@@ -1,11 +1,20 @@
 #ifndef GAME_H
 #define GAME_H
 
-#define NUM_INTERACTIVE_CATEGORIES 14 /* The number of scores the user can themselves choose */
+#define NUM_INTERACTIVE_CATEGORIES 12 /* The number of scores the user can themselves choose */
 #define NUM_CATEGORIES 17 /* Same as above, but includes the total rows, and things like the bonus */
 
 #define MAX_ROLLS 3
 #define NUM_DICE 5
+#define NUM_DIE_FACES 6
+
+#define LEN_LG_STRAIGHT 4
+#define LEN_SM_STRAIGHT 3
+
+#define POINTS_FULL_HOUSE 25
+#define POINTS_SM_STRAIGHT 30
+#define POINTS_LG_STRAIGHT 40
+#define POINTS_YAHTZEE 50
 
 #include <stdlib.h>
 
@@ -21,12 +30,12 @@ typedef enum {
     FULL_HOUSE,
     SM_STRAIGHT,
     LG_STRAIGHT,
+    YAHTZEE, /* Yahtzee is considered interactive, but not a required score. It's weird*/
 
     // This begins the none-interative scores
     UPPER_TOTAL,
     LOWER_TOTAL,
     COMPLETE_TOTAL,
-    YAHTZEE // Yahtzee is considered interactive, but not a required score. It's weird
 } CATEGORIES;
 
 #define DIE_1 0b00001

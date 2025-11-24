@@ -48,3 +48,13 @@ void rollDice(Yahtzee* y) {
         }
     }
 }
+
+// Updates the ephemeral scoreboard during rolls
+void update_ephemeral(Yahtzee* y) {
+
+    assert(y->curPlayer < y->numPlayers);
+
+    // iterate current player
+    // If they already have a score, then we skip
+    // Else if they dont have a score, then we calculate it from the current ro
+}

@@ -16,8 +16,6 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
-
-
     int caseNum = atoi(arg);
     switch (caseNum) {
         case 1:

@@ -12,7 +12,7 @@
 int main(void) {
     setlocale(LC_ALL, "");
 
-    wstr_t names[] = {L"Jfffason", L"ty"};
+    wstr_t names[] = {L"Blinda", L"Sophie", L"Jason", L"ty"};
     const Game game = setup_game(names, 4);
 
 
@@ -30,6 +30,7 @@ int main(void) {
 
     SCREEN *scr = newterm(NULL, stdout, stdin);
     draw_table(game.scoreboard);
+    draw_table_data(t);
     getch();
     endwin();
     delscreen(scr);

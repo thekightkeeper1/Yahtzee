@@ -30,6 +30,7 @@ void repeat(wchar_t* dest, const wchar_t c, const int n);
 void malloc_failed();
 Table make_autosized_table(wstr_t **columns, int numCols, int columnHeight);
 void free_autosized_table(Table t);
+void draw_table_data(const Table t);
 
 
 #endif // TUI_H

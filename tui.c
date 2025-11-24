@@ -48,12 +48,12 @@ Table make_autosized_table(wstr_t **columns, int numCols, int columnHeight) {
     
     for (int c = 0; c < numCols; c++)
     {
-        colWidths[c] = maxlen(columns[c], columnHeight);
+        colWidths[c] = maxlen(columns[c], columnHeight)+2;
     }
 
     // Getting the cumulative widths
     cumulativeWidths[0] = 0;
-    for (int i = 1; i < numCols ; i++) {
+    for (int i = 1; i < numCols+1 ; i++) {
         // Sum of previous cumulative width, plus the column we just passed, plus 1 for the right border
         cumulativeWidths[i] = cumulativeWidths[i-1] + colWidths[i-1] + 1;
     }
@@ -99,7 +99,7 @@ void get_cell_pos(const int r, const int c, int* x, int* y, const Table t) {
 }
 
 
-void draw_table(Table t) {
+void draw_table(const Table t) {
     
     // Nested iteration to draw every cell in the table
     for (int row = 0; row < t.numRows; row++) {
@@ -151,4 +151,14 @@ void draw_table(Table t) {
         
     }
     
+}
+
+void draw_table_data(const Table t) {
+    for (int c = 0; c < t.numCols; c++) {
+        for (int r = 0; r < t.numRows; r++) {
+            int y,x;
+            get_cell_pos(r, c, &x, &y, t);
+            mvaddwstr(y, x, t.columnData[c][r]);
+        }
+    }
 }

@@ -47,6 +47,7 @@ void rollDice(Yahtzee* y) {
             y->dice[i] = 1 + rand() % 6;
         }
     }
+    update_ephemeral(y);
 }
 
 // Updates the ephemeral scoreboard during rolls
@@ -56,5 +57,5 @@ void update_ephemeral(Yahtzee* y) {
 
     // iterate current player
     // If they already have a score, then we skip
-    // Else if they dont have a score, then we calculate it from the current ro
+    // Else if they dont have a score, then we calculate it from the current roll
 }

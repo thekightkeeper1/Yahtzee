@@ -6,7 +6,6 @@ void test_dice() {
 
 }
 
-
 // Runs some basic testing stuff. Pass args to it to test particular things?
 int main(int argc, char *argv[]) {
     const char* arg = argv[1];

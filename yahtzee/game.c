@@ -5,7 +5,6 @@
 
 #include "game.h"
 
-
 // Toggles the dice at the specifi
 void toggle_dice(Yahtzee* y, const u_int8_t toToggle) {
     // First, check that the wrong bits, the 3 highest, haven't been accidentally used
@@ -67,7 +66,8 @@ Yahtzee init_yahtzee(const int numPlayers, u_int64_t isAI) {
 
         // Ephemeral state
         .bufferScore = calloc(NUM_INTERACTIVE_CATEGORIES , sizeof(int)),
-        .curPlayer = 0,
+        .curPlayer = -1, //  must call next_round after init game
+        .round = -1,  //  must called next_round after init game
         .dice = {0},
         .currentRoll = 0
     };

@@ -2,7 +2,7 @@
 #define GAME_H
 
 #define NUM_INTERACTIVE_CATEGORIES 12 /* The number of scores the user can themselves choose */
-#define NUM_CATEGORIES 17 /* Same as above, but includes the total rows, and things like the bonus */
+#define NUM_CATEGORIES 15 /* Same as above, but includes the total rows, and things like the bonus */
 
 #define MAX_ROLLS 3
 #define NUM_DICE 5

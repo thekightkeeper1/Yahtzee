@@ -26,8 +26,39 @@ wstr_t CATEGORY_LABELS[NUM_CATEGORIES] = {
     L"Total"
 };
 
-void test_round_advancement(Yahtzee* y) {
+void print_check() {
+    printf("\033[1;32m");
+    printf("✓ ");
+    printf("\033[0m");
+}
 
+void print_cross() {
+    printf("\033[1;31m");
+    printf("✘ ");
+    printf("\033[0m");
+}
+
+void test_round_advancement() {
+    printf("\n\n\n--- Testing the round advancement --- \n");
+    Yahtzee game = init_yahtzee(2, 0b0);
+    Yahtzee* y = &game;
+    for (int round = 0; round < NUM_ROUNDS; round++) {
+        for (int plr = 0; plr < y->numPlayers; plr++) {
+            if (round == y->round && plr == y->curPlayer) {
+                print_check();
+            } else {
+                print_cross();
+            }
+            printf("stored=expected | round: %-2d=%2d player %d=%d\n", y->round, round, y->curPlayer, plr);
+            roll_dice(y);
+            roll_dice(y);
+            roll_dice(y);
+            update_score(y, round);
+            advance_player(y);
+        }
+    }
+    printf("The next round advancment should cause an assertion to fail. If it doesnt, game api doesnt catch an error\n");
+    advance_player(y);
 }
 
 void test_score_updating() {
@@ -140,6 +171,10 @@ int main(int argc, char *argv[]) {
             break;
         case 3:
             test_score_updating();
+            break;
+
+        case 4:
+            test_round_advancement();
             break;
         default:
             break;

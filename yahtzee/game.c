@@ -16,12 +16,16 @@ void toggle_dice(Yahtzee* y, const u_int8_t toToggle) {
 // Advances to. the next player, wrapping around and incrementing round number too
 // This does NOT, however, do anything other than offer an except when we are already over the number of rounds
 void advance_player(Yahtzee* y) {
-    if (y->round > NUM_ROUNDS)
+
+    // It should not be possible to advance the round, so disallow it
+    assert(y->round < NUM_ROUNDS);  // Rounds are 0 indexed, so it is exlusive <.
+
     y->curPlayer = (y->curPlayer + 1) % y->numPlayers;
 
     if (y->curPlayer == 0) {
         y->round++;
     }
+    y->currentRoll = 0;
 }
 
 // Returns true if all the scores have been filled and no more players should take their turn

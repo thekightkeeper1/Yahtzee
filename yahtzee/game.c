@@ -29,13 +29,8 @@ void advance_player(Yahtzee* y) {
 }
 
 // Returns true if all the scores have been filled and no more players should take their turn
-bool is_over(Yahtzee *y) {
-    const int lastPlayerIndex = y->numPlayers-1;
-    for (int cat = 0; cat < NUM_INTERACTIVE_CATEGORIES; cat++) {
-        if (cat == YAHTZEE)
-        if (y->scores[lastPlayerIndex][cat] == NOT_CHOSEN) return false;
-    }
-    return true;
+bool is_over(Yahtzee y) {
+    return y.round < NUM_ROUNDS;
 }
 
 // Sets the score given the buffer array of scores, and an index

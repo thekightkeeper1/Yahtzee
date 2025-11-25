@@ -118,7 +118,7 @@ void print_buffer_score(Yahtzee y) {
         printf("%d's: %d | ", i+1, y.bufferScore[i]);
     }
     printf("\n");
-    for (int i = SIXES + 1; i < NUM_CATEGORIES; i++) {
+    for (int i = SIXES + 1; i < NUM_INTERACTIVE_CATEGORIES; i++) {
 
         printf("%-20ls: %d\n", CATEGORY_LABELS[i], y.bufferScore[i+1]);
     }

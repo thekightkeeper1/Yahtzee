@@ -27,9 +27,9 @@ wstr_t CATEGORY_LABELS[NUM_CATEGORIES] = {
 };
 
 // alloc
-Table alloc_score_table(const int numHands, const wstr_t *playerNames, const int numPlayers) {
+Table alloc_score_table(const wstr_t *playerNames, const int numPlayers) {
 	const int numCols = numPlayers + 1; // To account for the score label column
-	const int colHeight = numHands + 1; // To account for the player label row
+	const int colHeight = NUM_CATEGORIES + 1; // To account for the player label row
 
 	// We need to make a buffer of wstr_t to represent all the data in each cell
 	// The first column is the labels
@@ -98,7 +98,7 @@ Game setup_game_ui(wstr_t *playerNames, const int numPlayers) {
 
 	game_tui.playerNames = playerNames;
 	game_tui.numPlayers = numPlayers;
-	game_tui.scoreboardTUI = alloc_score_table(NUM_CATEGORIES, game_tui.playerNames, game_tui.numPlayers);
+	game_tui.scoreboardTUI = alloc_score_table(game_tui.playerNames, game_tui.numPlayers);
 
 	return game_tui;
 }

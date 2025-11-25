@@ -12,7 +12,7 @@ typedef struct {
 
 extern wstr_t CATEGORY_LABELS[NUM_CATEGORIES];
 
-Table alloc_score_table(int numHands, const wstr_t *playerNames, int numPlayers);
+Table alloc_score_table(const wstr_t *playerNames, int numPlayers);
 void free_score_table(Table t);
 Game setup_game_ui(wstr_t* playerNames, int numPlayers);
 void set_score_and_update(int c, int r, int value, Table t);

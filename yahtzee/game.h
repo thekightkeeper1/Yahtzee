@@ -20,6 +20,7 @@
 #define POINTS_YAHTZEE 50
 
 #define NOT_CHOSEN (-1)
+#define CHOOSE_SCORE (0b11100000) // u_int8_t
 
 typedef enum {
     ONES,
@@ -70,5 +71,7 @@ void update_ephemeral(Yahtzee* y);
 bool update_score(const Yahtzee* y, int category);
 void advance_player(Yahtzee* y);
 bool is_over(Yahtzee y);
+void toggle_dice(Yahtzee* y, u_int8_t toToggle);
+
 
 #endif // GAME_H

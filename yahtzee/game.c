@@ -8,7 +8,7 @@
 // Toggles the dice at the specifi
 void toggle_dice(Yahtzee* y, const u_int8_t toToggle) {
     // First, check that the wrong bits, the 3 highest, haven't been accidentally used
-    assert(! (toToggle && 0b11100000));
+    assert(! (toToggle & 0b11100000));
 	y->locked_dice ^= toToggle;
 }
 
@@ -37,7 +37,6 @@ bool is_over(Yahtzee y) {
 // Sets the score given the buffer array of scores, and an index
 // Returns false if they chose a category that was already filled
 bool update_score(const Yahtzee* y, const int category) {
-
     const int plr = y->curPlayer;
     // Data sanitization
     assert(category < NUM_INTERACTIVE_CATEGORIES);  // Is a valid category
@@ -210,8 +209,5 @@ void update_ephemeral(Yahtzee* y) {
     y->bufferScore[LG_STRAIGHT] = has_large_straight(diceOccurrences) ? POINTS_LG_STRAIGHT : 0;
     y->bufferScore[SM_STRAIGHT] = has_small_straight(diceOccurrences) ? POINTS_SM_STRAIGHT : 0;
     y->bufferScore[YAHTZEE] = has_yahtzee(diceOccurrences) ? POINTS_YAHTZEE : 0;
-
-    // Totals:
-
 
 }

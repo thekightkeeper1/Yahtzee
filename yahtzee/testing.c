@@ -26,6 +26,54 @@ wstr_t CATEGORY_LABELS[NUM_CATEGORIES] = {
     L"Total"
 };
 
+int lock_sixes(const int dice[NUM_DICE]) {
+    u_int8_t locked = 0;
+    for (int i = 0; i < NUM_DICE; ++i) {
+        if (dice[i] == 6)
+            locked |= 0b1 << i;
+    }
+    if (!locked) return CHOOSE_SCORE;
+    return locked;
+}
+
+void test_game_driver() {
+
+    // Init the game and then start it.
+    // Starting it just advances current round and current player fromm -1 --> 0; You could do this manually too
+    srand(time(NULL));
+    Yahtzee game = init_yahtzee(2, 0b0);
+    Yahtzee* y = &game;
+    advance_player(y);
+
+    // This is the game loop that should always be followed for well-defined behavior
+    while (!is_over(game)) {
+        printf("--- Round %d  Player %d/%d --- \n", y->round+1, y->curPlayer+1, y->numPlayers);
+
+        // This is the dice rolling loop that should always be used for well-defined behavior
+        for (int i = 0; i < MAX_ROLLS; i++) {
+            roll_dice(y);  // Goes first
+
+            const u_int8_t locked = lock_sixes(game.dice); // Replace function with user interaction
+            if (locked == CHOOSE_SCORE) {  // Required check before using toggle_dice
+                break;
+            }
+            if (locked & CHOOSE_SCORE) {
+                // The above checks if they had the same exact bits.
+                // This checks if any of the bits on the locked dice are out of range
+                // This doesnt really need to be checked here, its just a usage note
+                printf("Developer accidentally used the wrong bits, exiting.");
+                exit(1);
+            }
+            toggle_dice(y, locked);
+        }
+        const int chosen_category = y->round;  // Replace with user interaction
+        update_score(y, chosen_category);
+        print_dice(game);  // Replace with anything to display what the user did on their turn.
+        advance_player(y);
+    }
+        print_scoreboard(game);
+}
+
 void print_check() {
     printf("\033[1;32m");
     printf("✓ ");
@@ -203,6 +251,9 @@ int main(int argc, char *argv[]) {
 
         case 4:
             test_round_advancement();
+            break;
+        case 5:
+            test_game_driver();
             break;
         default:
             break;

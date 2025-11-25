@@ -151,4 +151,7 @@ void update_ephemeral(Yahtzee* y) {
     y->bufferScore[SM_STRAIGHT] = has_small_straight(diceOccurrences) ? POINTS_SM_STRAIGHT : 0;
     y->bufferScore[YAHTZEE] = has_yahtzee(diceOccurrences) ? POINTS_YAHTZEE : 0;
 
+    // Totals:
+
+
 }

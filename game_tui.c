@@ -3,12 +3,11 @@
 */
 
 #include <stdlib.h>
-#include <threads.h>
 
 #include "game_tui.h"
 #include "tui.h"
 
-// The labels themselves can be changed for stlying. The number and position cannot
+// The labels themselves can be changed for styling. The number and position cannot
 wstr_t CATEGORY_LABELS[NUM_CATEGORIES] = {
 	L"Ones",
 	L"Twos",

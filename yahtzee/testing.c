@@ -3,6 +3,27 @@
 #include <time.h>
 #include <stdbool.h>
 #include "testing.h"
+#include <wchar.h>
+
+#include "../game_tui.h"
+
+wstr_t CATEGORY_LABELS[NUM_CATEGORIES] = {
+    L"Ones",
+    L"Twos",
+    L"Threes",
+    L"Fours",
+    L"Fives",
+    L"Sixes",
+    L"Three of a Kind",
+    L"Four of a Kind",
+    L"Small Straight",
+    L"Large Straight",
+    L"Full House",
+    L"Yahtzee",
+    L"Upper Total",
+    L"Lower Total",
+    L"Total"
+};
 
 // Function for testing
 void test_dice(Yahtzee* y, u_int8_t toLock, bool resetRolls) {
@@ -11,8 +32,22 @@ void test_dice(Yahtzee* y, u_int8_t toLock, bool resetRolls) {
     rollDice(y);
     print_dice(*y);
 }
-void test_scoring() {
+
+void set_dice(Yahtzee *y, int d1, int d2, int d3, int d4, int d5) {
+  y->dice[0] = d1;
+  y->dice[1] = d2;
+  y->dice[2] = d3;
+  y->dice[3] = d4;
+  y->dice[4] = d5;
+}
+
+void test_scoring_driver() {
     srand(time(NULL));
+    Yahtzee game = init_yahtzee(1, 0b0);
+    Yahtzee* y = &game;
+    set_dice(y, 1, 1, 1, 1, 1);
+    update_ephemeral(y);
+    print_buffer_score(game);
 
 }
 
@@ -46,6 +81,8 @@ void test_dice_driver() {
 
 // Runs some basic testing stuff. Pass args to it to test particular things?
 int main(int argc, char *argv[]) {
+
+
     const char* arg = argv[1];
 
     if (arg == NULL) {
@@ -59,7 +96,7 @@ int main(int argc, char *argv[]) {
             test_dice_driver();
             break;
         case 2:
-            test_scoring();
+            test_scoring_driver();
             break;
         default:
             break;
@@ -76,8 +113,14 @@ void print_dice(Yahtzee y) {
 }
 
 void print_buffer_score(Yahtzee y) {
-    for (int i = 0; i < NUM_INTERACTIVE_CATEGORIES; i++) {
-        printf("%d: %d\n", i, y.bufferScore[i]);
+    printf("| ");
+    for (int i = 0; i < SIXES+1; i++) {
+        printf("%d's: %d | ", i+1, y.bufferScore[i]);
+    }
+    printf("\n");
+    for (int i = SIXES + 1; i < NUM_CATEGORIES; i++) {
+
+        printf("%-20ls: %d\n", CATEGORY_LABELS[i], y.bufferScore[i+1]);
     }
 }
 

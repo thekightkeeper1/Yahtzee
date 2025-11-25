@@ -69,5 +69,6 @@ void roll_dice(Yahtzee* y);
 void update_ephemeral(Yahtzee* y);
 bool update_score(const Yahtzee* y, int category);
 void advance_player(Yahtzee* y);
+bool is_over(Yahtzee y);
 
 #endif // GAME_H

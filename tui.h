@@ -28,24 +28,6 @@ typedef enum {
     LABEL_CELL
 } color_pair_t;
 
-// Labels used for the score table. Fine to change this the table is all dynamic.
-const wstr_t YAHTZEE_HANDS[NUM_CATEGORIES] = {
-    L"Ones",
-    L"Twos",
-    L"Threes",
-    L"Fours",
-    L"Fives",
-    L"Sixes",
-    L"Three of a Kind",
-    L"Four of a Kind",
-    L"Small Straight",
-    L"Large Straight",
-    L"Full House",
-    L"Yahtzee",
-    L"Upper total",
-    L"Lower total",
-    L"Total",
-};
 
 
 Table make_autosized_table(wstr_t **columns, int numCols, int columnHeight);

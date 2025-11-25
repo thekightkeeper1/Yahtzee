@@ -8,12 +8,29 @@
 #include "game_tui.h"
 #include "tui.h"
 
+// The labels themselves can be changed for stlying. The number and position cannot
+wstr_t CATEGORY_LABELS[NUM_CATEGORIES] = {
+	L"Ones",
+	L"Twos",
+	L"Threes",
+	L"Fours",
+	L"Fives",
+	L"Sixes",
+	L"Three of a Kind",
+	L"Four of a Kind",
+	L"Small Straight",
+	L"Large Straight",
+	L"Full House",
+	L"Yahtzee",
+	L"Upper Total",
+	L"Lower Total",
+	L"Total"
+};
 
 // alloc
-Table alloc_score_table(wstr_t *hands, int numHands, wstr_t* playerNames, int numPlayers) {
-
-    const int numCols = numPlayers + 1; // To account for the score label column
-    const int colHeight = numHands + 1; // To account for the player label row
+Table alloc_score_table(const int numHands, const wstr_t *playerNames, const int numPlayers) {
+	const int numCols = numPlayers + 1; // To account for the score label column
+	const int colHeight = numHands + 1; // To account for the player label row
 
     // We need to make a buffer of wstr_t to represent all the data in each cell
     // The first column is the labels
@@ -87,36 +104,14 @@ wchar_t** int_array_to_wchar_array(const int nums[], wchar_t** strs, const int n
     
 }
 
-Game setup_game_ui(wstr_t* playerNames, const int numPlayers) {
+Game setup_game_ui(wstr_t *playerNames, const int numPlayers) {
+	Game game_tui;
 
-    Game game;
+	game_tui.playerNames = playerNames;
+	game_tui.numPlayers = numPlayers;
+	game_tui.scoreboardTUI = alloc_score_table(NUM_CATEGORIES, game_tui.playerNames, game_tui.numPlayers);
 
-    // This is the types of hands that you can win. 
-    // Feel free to edit this, just make sure to add a function in todo that handles rules for that category
-    wstr_t yahtzeeHands[] = { 
-        L"Ones",
-        L"Twos",
-        L"Threes",
-        L"Fours",
-        L"Fives",
-        L"Sixes",
-        L"Bonus",
-        L"Three of a Kind",
-        L"Four of a Kind",
-        L"Small Straight",
-        L"Large Straight",
-        L"Full House",
-        L"Yahtzee",
-        L"Chance",
-    };  
-    
-    game.handCategories = yahtzeeHands;
-    game.playerNames = playerNames;
-    game.numPlayers = numPlayers;
-    game.numHands = 14;
-    game.scoreboardTUI = alloc_score_table(game.handCategories, game.numHands, game.playerNames, game.numPlayers);
-
-    return game;
+	return game_tui;
 }
 
 void set_score_and_update(const int c, const int r, const int value, const Table t) {

@@ -16,9 +16,9 @@ wstr_t CATEGORY_LABELS[NUM_CATEGORIES] = {
     L"Sixes",
     L"Three of a Kind",
     L"Four of a Kind",
+    L"Full House",
     L"Small Straight",
     L"Large Straight",
-    L"Full House",
     L"Yahtzee",
     L"Upper Total",
     L"Lower Total",
@@ -120,7 +120,7 @@ void print_buffer_score(Yahtzee y) {
     printf("\n");
     for (int i = SIXES + 1; i < NUM_INTERACTIVE_CATEGORIES; i++) {
 
-        printf("%-20ls: %d\n", CATEGORY_LABELS[i], y.bufferScore[i+1]);
+        printf("%-20ls: %d\n", CATEGORY_LABELS[i], y.bufferScore[i]);
     }
 }
 

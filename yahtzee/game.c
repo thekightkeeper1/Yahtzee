@@ -142,6 +142,7 @@ void update_ephemeral(Yahtzee* y) {
     y->bufferScore[FOUR_OF]  = fourFace  > -1 ?  (fourFace+1)  * LEN_LG_STRAIGHT : 0;
 
     // Full house
+    printf("we should have a full house because we have a yahtzee: %s\n", has_yahtzee(diceOccurrences) ? "true" : "false");
     y->bufferScore[FULL_HOUSE] = has_full_house(diceOccurrences) || has_yahtzee(diceOccurrences) ? POINTS_FULL_HOUSE : 0;
 
     // Straights/yahtzee

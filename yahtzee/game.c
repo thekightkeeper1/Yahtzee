@@ -1,15 +1,70 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include <assert.h>
 #include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "game.h"
+
+
+// Toggles the dice at the specifi
+void toggle_dice(Yahtzee* y, const u_int8_t toToggle) {
+    // First, check that the wrong bits, the 3 highest, haven't been accidentally used
+    assert(! (toToggle && 0b11100000));
+	y->locked_dice ^= toToggle;
+}
+
+// Advances to. the next player, wrapping around and incrementing round number too
+// This does NOT, however, do anything other than offer an except when we are already over the number of rounds
+void advance_player(Yahtzee* y) {
+    if (y->round > NUM_ROUNDS)
+    y->curPlayer = (y->curPlayer + 1) % y->numPlayers;
+
+    if (y->curPlayer == 0) {
+        y->round++;
+    }
+}
+
+// Returns true if all the scores have been filled and no more players should take their turn
+bool is_over(Yahtzee *y) {
+    const int lastPlayerIndex = y->numPlayers-1;
+    for (int cat = 0; cat < NUM_INTERACTIVE_CATEGORIES; cat++) {
+        if (cat == YAHTZEE)
+        if (y->scores[lastPlayerIndex][cat] == NOT_CHOSEN) return false;
+    }
+    return true;
+}
+
+// Sets the score given the buffer array of scores, and an index
+// Returns false if they chose a category that was already filled
+bool update_score(const Yahtzee* y, const int category) {
+
+    const int plr = y->curPlayer;
+    // Data sanitization
+    assert(category < NUM_INTERACTIVE_CATEGORIES);  // Is a valid category
+
+    // It is resonable to assume that a dev might not want to ensure they chose a valid category
+    // This is thus not an assertion, but just a return value
+    if (y->scores[plr][category] != NOT_CHOSEN) return false;
+
+    // Now we update the score
+    y->scores[plr][category] = y->bufferScore[category];
+
+    // Now we either update the lower, or the upper total
+    if (category <= SIXES) {
+        y->scores[plr][UPPER_TOTAL] += y->bufferScore[category];
+    } else {
+        y->scores[plr][LOWER_TOTAL] += y->bufferScore[category];
+    }
+    y->scores[plr][COMPLETE_TOTAL] += y->bufferScore[category];
+
+    return true;
+}
 
 Yahtzee init_yahtzee(const int numPlayers, u_int64_t isAI) {
     const Yahtzee y = {
 
         .numPlayers = numPlayers,
-        .scores = calloc(numPlayers, sizeof(int*)),
+        .scores = malloc(numPlayers * sizeof(int*)),
 
         // Ephemeral state
         .bufferScore = calloc(NUM_INTERACTIVE_CATEGORIES , sizeof(int)),
@@ -18,8 +73,14 @@ Yahtzee init_yahtzee(const int numPlayers, u_int64_t isAI) {
         .currentRoll = 0
     };
 
-    for (int n = 0; n < numPlayers; n++) {
-        y.scores[n] = calloc(NUM_CATEGORIES, sizeof(int));
+
+    // Allocating the score arrays, and initiilizing them to NOT_CHOSEN for the interactive categories
+    // For the total categories, let them be set to 0, since that is the total of points
+    for (int plr = 0; plr < numPlayers; plr++) {
+        y.scores[plr] = malloc(NUM_CATEGORIES * sizeof(int));
+        for (int cat = 0; cat < NUM_CATEGORIES; cat++) {
+            y.scores[plr][cat] = cat < NUM_INTERACTIVE_CATEGORIES ? NOT_CHOSEN : 0;
+        }
     }
     return y;
 }
@@ -34,7 +95,7 @@ void end_yahtzee(const Yahtzee y) {
 }
 
 // Rolls the dice in the yahtzee game.
-void rollDice(Yahtzee* y) {
+void roll_dice(Yahtzee* y) {
     // Handles all dice rolling logic, including resetting locked dice if we are on 0 rolls
     // And advancing the number of rolls
 

@@ -3,9 +3,10 @@
 #include <time.h>
 #include <stdbool.h>
 #include "testing.h"
+
+#include <assert.h>
 #include <wchar.h>
 
-#include "../game_tui.h"
 
 wstr_t CATEGORY_LABELS[NUM_CATEGORIES] = {
     L"Ones",
@@ -25,13 +26,52 @@ wstr_t CATEGORY_LABELS[NUM_CATEGORIES] = {
     L"Total"
 };
 
-// Function for testing
+void test_round_advancement(Yahtzee* y) {
+
+}
+
+void test_score_updating() {
+    Yahtzee game = init_yahtzee(1, 0b0);
+    Yahtzee* y = &game;
+
+    for (int cat = 0; cat < NUM_INTERACTIVE_CATEGORIES; cat++) {
+        int expected_total = (int) ((cat+1) * (cat+2)) / 2;
+        y->bufferScore[cat] = cat+1;
+        assert(update_score(y, cat));
+        if (expected_total == y->scores[0][COMPLETE_TOTAL] && y->scores[0][cat] == cat+1) {
+            printf("\033[1;32m");
+            printf("✓ ");
+            printf("\033[0m");
+            printf("Updated %-15ls <- %d; matches expected %d | Totals match too. \n", CATEGORY_LABELS[cat], y->scores[0][cat], cat+1);
+        } else {
+            printf("\033[1;31m");
+            printf("✘ ");
+            printf("\033[0m");
+            printf("Updated %-15ls <- %d, but the expected total is %d \n", CATEGORY_LABELS[cat], y->scores[0][cat], cat+1);
+
+        }
+
+        // print_scoreboard(game);
+
+    }
+
+    for (int cat = 0; cat < NUM_INTERACTIVE_CATEGORIES; cat++) {
+        y->bufferScore[cat] = cat+1;
+        assert(!update_score(y, cat));
+        printf("\033[1;32m");
+        printf("✓ ");
+        printf("\033[0m");
+        printf("Detected %-15ls : %d to be locked in already\n", CATEGORY_LABELS[cat], y->scores[0][cat]);
+    }
+}
+
 void test_dice(Yahtzee* y, u_int8_t toLock, bool resetRolls) {
     y->currentRoll = resetRolls ? 0 : y->currentRoll;
     y->locked_dice = toLock;
-    rollDice(y);
+    roll_dice(y);
     print_dice(*y);
 }
+
 
 void set_dice(Yahtzee *y, int d1, int d2, int d3, int d4, int d5) {
   y->dice[0] = d1;
@@ -98,6 +138,9 @@ int main(int argc, char *argv[]) {
         case 2:
             test_scoring_driver();
             break;
+        case 3:
+            test_score_updating();
+            break;
         default:
             break;
     }
@@ -112,7 +155,8 @@ void print_dice(Yahtzee y) {
     printf("\n");
 }
 
-void print_buffer_score(Yahtzee y) {
+void print_buffer_score(const Yahtzee y) {
+    printf("--- Buffer ---\n");
     printf("| ");
     for (int i = 0; i < SIXES+1; i++) {
         printf("%d's: %d | ", i+1, y.bufferScore[i]);
@@ -124,5 +168,12 @@ void print_buffer_score(Yahtzee y) {
     }
 }
 
-void print_scoreboard() {
+void print_scoreboard(const Yahtzee y) {
+
+    printf("--- Scoreboard ---\n");
+    for (int i = 0; i < NUM_CATEGORIES; i++) {
+
+        printf("%-20ls: %d\n", CATEGORY_LABELS[i], y.scores[0][i]);
+    }
+
 }

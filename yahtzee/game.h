@@ -1,8 +1,11 @@
 #ifndef GAME_H
 #define GAME_H
+#include <stdbool.h>
+#include <stdlib.h>
 
 #define NUM_INTERACTIVE_CATEGORIES 12 /* The number of scores the user can themselves choose */
 #define NUM_CATEGORIES 15 /* Same as above, but includes the total rows, and things like the bonus */
+#define NUM_ROUNDS NUM_INTERACTIVE_CATEGORIES
 
 #define MAX_ROLLS 3
 #define NUM_DICE 5
@@ -16,7 +19,7 @@
 #define POINTS_LG_STRAIGHT 40
 #define POINTS_YAHTZEE 50
 
-#include <stdlib.h>
+#define NOT_CHOSEN (-1)
 
 typedef enum {
     ONES,
@@ -30,9 +33,9 @@ typedef enum {
     FULL_HOUSE,
     SM_STRAIGHT,
     LG_STRAIGHT,
-    YAHTZEE, /* Yahtzee is considered interactive, but not a required score. It's weird */
+    YAHTZEE,
 
-    // This begins the none-interactive scores
+    // This begins the none-interactive scores. Instead calculated by the scoring program
     UPPER_TOTAL,
     LOWER_TOTAL,
     COMPLETE_TOTAL,
@@ -45,7 +48,6 @@ typedef enum {
 #define DIE_5 0b10000
 
 typedef struct {
-
     /* State for the entire game */
     int numPlayers;
     int** scores;  // First index is the player, second is the particular score
@@ -55,6 +57,7 @@ typedef struct {
     int curPlayer;  // The index of the turn player
     int dice[NUM_DICE];
     int currentRoll; // Shows how many times the dice have been rolled this turn
+    int round;
     u_int8_t locked_dice;
 
 } Yahtzee;
@@ -62,6 +65,8 @@ typedef struct {
 /* Functions */
 Yahtzee init_yahtzee(int numPlayers, u_int64_t isAI);
 void end_yahtzee(Yahtzee y);
-void rollDice(Yahtzee* y);
+void roll_dice(Yahtzee* y);
 void update_ephemeral(Yahtzee* y);
+bool update_score(const Yahtzee* y, int category);
+
 #endif // GAME_H

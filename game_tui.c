@@ -107,3 +107,5 @@ void set_score_and_update(const int c, const int r, const int value, const Table
 	swprintf(t.columnData[c][r], 5, L"%d", value);
 	draw_cell_data(t, c, r, FILLED_SCORE);
 }
+
+

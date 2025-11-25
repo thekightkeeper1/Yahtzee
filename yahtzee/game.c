@@ -1,9 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-#include <time.h>
 #include <stdbool.h>
-#include "testing.h"
 
 #include "game.h"
 
@@ -14,7 +12,7 @@ Yahtzee init_yahtzee(const int numPlayers, u_int64_t isAI) {
         .scores = calloc(numPlayers, sizeof(int*)),
 
         // Ephemeral state
-        .bufferScore = calloc(NUM_CATEGORIES , sizeof(int)),
+        .bufferScore = calloc(NUM_INTERACTIVE_CATEGORIES , sizeof(int)),
         .curPlayer = 0,
         .dice = {0},
         .currentRoll = 0
@@ -28,7 +26,7 @@ Yahtzee init_yahtzee(const int numPlayers, u_int64_t isAI) {
 
 // Frees ANY memory allocated by this library
 void end_yahtzee(const Yahtzee y) {
-    for (int n = 0; n < NUM_CATEGORIES; n++) {
+    for (int n = 0; n < y.numPlayers; n++) {
         free(y.scores[n]);
     }
     free(y.scores);

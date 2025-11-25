@@ -44,13 +44,12 @@ void test_round_advancement() {
     Yahtzee* y = &game;
 
     for (int round = 0; round < NUM_ROUNDS; round++) {
-        int displayRound = round+1;
         for (int plr = 0; plr < y->numPlayers; plr++) {
+            advance_player(y);
             roll_dice(y);
             roll_dice(y);
             roll_dice(y);
             update_score(y, round);
-            advance_player(y);
             if (is_over(game)) {
                 print_cross();
                 printf("The api thought the game was over when it isnt...\n");

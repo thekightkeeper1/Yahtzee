@@ -20,7 +20,7 @@ void repeat(wchar_t* dest, const wchar_t c, const int n) {
     dest[i] = L'\0'; 
 }
 
-int maxlen(wchar_t **arr, int n) {
+int maxlen(wchar_t **arr, const int n) {
     int max = 0;
     for (int i = 0; i < n; i++) {
         const int len = (int)wcslen(arr[i]);
@@ -35,7 +35,7 @@ int maxlen(wchar_t **arr, int n) {
 // columns is the data
 // num columns is number of columns in the table
 
-Table make_autosized_table(wstr_t **columns, int numCols, int columnHeight) {
+Table make_autosized_table(wstr_t **columns, const int numCols, const int columnHeight) {
     int *colWidths = malloc(sizeof(int) * numCols); 
     int *cumulativeWidths = malloc(sizeof(int) * (numCols + 1));  // Cummulative widths are shifted. Always the first cell=0, and we need one extra to get the last cell=sum(widths)
     wstr_t *cellBottoms = malloc(sizeof(wstr_t) * numCols);
@@ -81,7 +81,7 @@ Table make_autosized_table(wstr_t **columns, int numCols, int columnHeight) {
     
 }
 
-void free_autosized_table(Table t) {
+void free_autosized_table(const Table t) {
     // Freeing the deepest stuff first, the arrays of strs
     for (int i = 0; i < t.numCols; i++) {
         free(t.cellBottoms[i]);
@@ -107,10 +107,10 @@ void draw_table(const Table t) {
     for (int row = 0; row < t.numRows; row++) {
         
         // For this entire row we keep the same y for cells
-        int cellY = t.y + 1 + 2*row;  // Shifted to account for top border of table, since cells dont draw their own top border
+        const int cellY = t.y + 1 + 2*row;  // Shifted to account for top border of table, since cells dont draw their own top border
  
         for (int col = 0; col < t.numCols; col++) {
-            int cellX = t.x + t.cumulativeWidths[col] ;
+            const int cellX = t.x + t.cumulativeWidths[col] ;
 
             // Top border
             if (row == 0) {
@@ -165,7 +165,7 @@ void draw_table_data(const Table t) {
     }
 }
 
-void draw_cell_data(Table t, int c, int r, color_pair_t color) {
+void draw_cell_data(const Table t, const int c, const int r, const color_pair_t color) {
     int y, x;
     get_cell_pos(r, c, &x, &y, t);
     move(y, x);

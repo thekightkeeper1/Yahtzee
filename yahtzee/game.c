@@ -18,7 +18,7 @@ void toggle_dice(Yahtzee* y, const u_int8_t toToggle) {
 void advance_player(Yahtzee* y) {
 
     // It should not be possible to advance the round, so disallow it
-    assert(y->round < NUM_ROUNDS);  // Rounds are 0 indexed, so it is exlusive <.
+    assert(!is_over(*y));
 
     y->curPlayer = (y->curPlayer + 1) % y->numPlayers;
 

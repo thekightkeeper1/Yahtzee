@@ -42,14 +42,11 @@ void test_round_advancement() {
     printf("\n\n\n--- Testing the round advancement --- \n");
     Yahtzee game = init_yahtzee(2, 0b0);
     Yahtzee* y = &game;
+    game.curPlayer = 0;
+    game.round = 0;
     for (int round = 0; round < NUM_ROUNDS; round++) {
+        int displayRound = round+1;
         for (int plr = 0; plr < y->numPlayers; plr++) {
-            if (round == y->round && plr == y->curPlayer) {
-                print_check();
-            } else {
-                print_cross();
-            }
-            printf("stored=expected | round: %-2d=%2d player %d=%d\n", y->round, round, y->curPlayer, plr);
             roll_dice(y);
             roll_dice(y);
             roll_dice(y);
@@ -59,6 +56,13 @@ void test_round_advancement() {
                 print_cross();
                 printf("The api thought the game was over when it isnt...\n");
             }
+            if (round == y->round && plr == y->curPlayer) {
+                print_check();
+            } else {
+                print_cross();
+            }
+            printf("stored=expected | round: %-2d=%2d player %d=%d\n", y->round, round, y->curPlayer, plr);
+
         }
     }
 
@@ -80,6 +84,8 @@ void test_round_advancement() {
 void test_score_updating() {
     Yahtzee game = init_yahtzee(1, 0b0);
     Yahtzee* y = &game;
+    y->curPlayer=0;
+    y->round=0;
 
     for (int cat = 0; cat < NUM_INTERACTIVE_CATEGORIES; cat++) {
         int expected_total = (int) ((cat+1) * (cat+2)) / 2;
@@ -131,6 +137,8 @@ void set_dice(Yahtzee *y, int d1, int d2, int d3, int d4, int d5) {
 void test_scoring_driver() {
     srand(time(NULL));
     Yahtzee game = init_yahtzee(1, 0b0);
+    game.round = 0;
+    game.curPlayer = 0;
     Yahtzee* y = &game;
     set_dice(y, 1, 1, 1, 1, 1);
     update_ephemeral(y);
@@ -144,6 +152,8 @@ void test_dice_driver() {
     // Testing the locking of each individual die
     printf("Testing each die\n");
     Yahtzee y = init_yahtzee(1, 0b0);
+    y.curPlayer = 0;
+    y.round = 0;
     test_dice(&y, 0b0, true);
     test_dice(&y, DIE_1, true);
     test_dice(&y, DIE_2, true);

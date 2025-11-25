@@ -30,9 +30,9 @@ typedef enum {
     FULL_HOUSE,
     SM_STRAIGHT,
     LG_STRAIGHT,
-    YAHTZEE, /* Yahtzee is considered interactive, but not a required score. It's weird*/
+    YAHTZEE, /* Yahtzee is considered interactive, but not a required score. It's weird */
 
-    // This begins the none-interative scores
+    // This begins the none-interactive scores
     UPPER_TOTAL,
     LOWER_TOTAL,
     COMPLETE_TOTAL,

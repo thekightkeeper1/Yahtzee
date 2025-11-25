@@ -1,10 +1,13 @@
 /*
 * Interaction between core game logic and the TUI
 */
-#include "game_tui.h"
-#include "tui.h"
+
 #include <stdlib.h>
 #include <threads.h>
+
+#include "game_tui.h"
+#include "tui.h"
+
 
 // alloc
 Table alloc_score_table(wstr_t *hands, int numHands, wstr_t* playerNames, int numPlayers) {

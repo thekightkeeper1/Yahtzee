@@ -42,8 +42,7 @@ void test_round_advancement() {
     printf("\n\n\n--- Testing the round advancement --- \n");
     Yahtzee game = init_yahtzee(2, 0b0);
     Yahtzee* y = &game;
-    game.curPlayer = 0;
-    game.round = 0;
+
     for (int round = 0; round < NUM_ROUNDS; round++) {
         int displayRound = round+1;
         for (int plr = 0; plr < y->numPlayers; plr++) {

@@ -3,8 +3,6 @@
 #include <time.h>
 #include <stdbool.h>
 #include "testing.h"
-#include "game_tui.h"
-
 
 // Function for testing
 void test_dice(Yahtzee* y, u_int8_t toLock, bool resetRolls) {

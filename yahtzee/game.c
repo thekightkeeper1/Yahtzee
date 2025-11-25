@@ -28,6 +28,8 @@ void advance_player(Yahtzee* y) {
 }
 
 // Returns true if all the scores have been filled and no more players should take their turn
+// YOU MUST ADVANCE PLAYER BEFORE CALLING THIS, IT DOESNT DETECT ANYTHING BEFORE ADVANCING PLAYER
+// This is so that you can do while (!is_over(y)) and it will only fail when it is on an invalid player turn
 bool is_over(Yahtzee y) {
     return y.round >= NUM_ROUNDS;
 }

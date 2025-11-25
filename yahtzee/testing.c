@@ -43,6 +43,7 @@ void test_round_advancement() {
     Yahtzee game = init_yahtzee(2, 0b0);
     Yahtzee* y = &game;
 
+    int numRounds = 0;
     for (int round = 0; round < NUM_ROUNDS; round++) {
         for (int plr = 0; plr < y->numPlayers; plr++) {
             advance_player(y);
@@ -62,9 +63,12 @@ void test_round_advancement() {
             printf("stored=expected | round: %-2d=%2d player %d=%d\n", y->round, round, y->curPlayer, plr);
 
         }
+        numRounds++;
     }
 
+    printf("We had %d rounds completed\n", numRounds);
     printf("--- Testing game over functionality ---\n");
+    advance_player(y);
     if (is_over(game)) {
         print_check();
         printf(" Successfuly detected end of the game\n");

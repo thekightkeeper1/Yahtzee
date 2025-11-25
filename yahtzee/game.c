@@ -7,11 +7,13 @@
 
 #include "game.h"
 
-Yahtzee init_yahtzee(int numPlayers, u_int64_t isAI) {
+Yahtzee init_yahtzee(const int numPlayers, u_int64_t isAI) {
     const Yahtzee y = {
+
         .numPlayers = numPlayers,
         .scores = calloc(numPlayers, sizeof(int*)),
 
+        // Ephemeral state
         .bufferScore = calloc(NUM_CATEGORIES , sizeof(int)),
         .curPlayer = 0,
         .dice = {0},
@@ -121,11 +123,6 @@ bool has_yahtzee(int occurrences[NUM_DIE_FACES]) {
 
 // Updates the ephemeral scoreboard during rolls
 void update_ephemeral(Yahtzee* y) {
-    y->dice[0] = 6;
-    y->dice[1] = 6;
-    y->dice[2] = 6;
-    y->dice[3] = 6;
-    y->dice[4] = 6;
 
     assert(y->curPlayer < y->numPlayers);
     // First we tally up all the face values
@@ -143,10 +140,8 @@ void update_ephemeral(Yahtzee* y) {
     // Of a kind scores
     int threeFace, fourFace;
     of_a_kind_faces(diceOccurrences, &threeFace, &fourFace);
-    printf("%d\n", fourFace);
     y->bufferScore[THREE_OF] = threeFace > -1 ?  (threeFace+1) * LEN_SM_STRAIGHT : 0;
     y->bufferScore[FOUR_OF]  = fourFace  > -1 ?  (fourFace+1)  * LEN_LG_STRAIGHT : 0;
-
 
     // Full house
     y->bufferScore[FULL_HOUSE] = has_full_house(diceOccurrences) || has_yahtzee(diceOccurrences) ? POINTS_FULL_HOUSE : 0;
@@ -155,9 +150,5 @@ void update_ephemeral(Yahtzee* y) {
     y->bufferScore[LG_STRAIGHT] = has_large_straight(diceOccurrences) ? POINTS_LG_STRAIGHT : 0;
     y->bufferScore[SM_STRAIGHT] = has_small_straight(diceOccurrences) ? POINTS_SM_STRAIGHT : 0;
     y->bufferScore[YAHTZEE] = has_yahtzee(diceOccurrences) ? POINTS_YAHTZEE : 0;
-    print_dice(*y);
-    print_buffer_score(*y);
-    exit(0);
-
 
 }

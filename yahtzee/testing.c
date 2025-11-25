@@ -16,7 +16,7 @@ void test_scoring() {
 
 }
 
-void test_score_buffer() {
+void test_dice_driver() {
     srand(time(NULL));
 
     // Testing the locking of each individual die
@@ -56,9 +56,10 @@ int main(int argc, char *argv[]) {
     const int caseNum = atoi(arg);
     switch (caseNum) {
         case 1:
+            test_dice_driver();
             break;
         case 2:
-            test_score_buffer();
+            test_scoring();
             break;
         default:
             break;

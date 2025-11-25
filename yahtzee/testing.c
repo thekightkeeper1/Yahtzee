@@ -55,10 +55,26 @@ void test_round_advancement() {
             roll_dice(y);
             update_score(y, round);
             advance_player(y);
+            if (is_over(game)) {
+                print_cross();
+                printf("The api thought the game was over when it isnt...\n");
+            }
         }
     }
+
+    printf("--- Testing game over functionality ---\n");
+    if (is_over(game)) {
+        print_check();
+        printf(" Successfuly detected end of the game\n");
+    } else {
+        print_cross();
+        printf("The api didnt't return true that the game is over\n");
+
+    }
+
     printf("The next round advancment should cause an assertion to fail. If it doesnt, game api doesnt catch an error\n");
     advance_player(y);
+
 }
 
 void test_score_updating() {

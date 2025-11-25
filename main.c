@@ -3,6 +3,8 @@
 #include "main.h"
 #include "tui.h"
 #include "game_tui.h"
+#include <ncursesw/ncurses.h>
+
 
 
 

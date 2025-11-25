@@ -2,7 +2,6 @@
 
 #include <assert.h>
 #include <stdlib.h>
-#include <ncursesw/menu.h>
 #include <ncursesw/ncurses.h>
 
 void malloc_failed() {

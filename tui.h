@@ -5,7 +5,6 @@
 #define _XOPEN_SOURCE_EXTENDED /* Required for ncurses to actually use the unicode funcs MUST GO FIRST*/
 
 #include "wchar.h"
-#include "./yahtzee/game.h"
 
 typedef wchar_t* wstr_t;
 typedef struct {

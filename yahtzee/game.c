@@ -30,7 +30,7 @@ void advance_player(Yahtzee* y) {
 
 // Returns true if all the scores have been filled and no more players should take their turn
 bool is_over(Yahtzee y) {
-    return y.round < NUM_ROUNDS;
+    return y.round >= NUM_ROUNDS;
 }
 
 // Sets the score given the buffer array of scores, and an index

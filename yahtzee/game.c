@@ -211,3 +211,7 @@ void update_ephemeral(Yahtzee* y) {
     y->bufferScore[YAHTZEE] = has_yahtzee(diceOccurrences) ? POINTS_YAHTZEE : 0;
 
 }
+
+void take_ai_turn(Yahtzee* y) {
+
+}

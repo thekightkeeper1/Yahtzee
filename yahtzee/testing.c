@@ -142,14 +142,10 @@ void test_score_updating() {
         y->bufferScore[cat] = cat+1;
         assert(update_score(y, cat));
         if (expected_total == y->scores[0][COMPLETE_TOTAL] && y->scores[0][cat] == cat+1) {
-            printf("\033[1;32m");
-            printf("✓ ");
-            printf("\033[0m");
-            printf("Updated %-15ls <- %d; matches expected %d | Totals match too. \n", CATEGORY_LABELS[cat], y->scores[0][cat], cat+1);
+            print_check()
+;            printf("Updated %-15ls <- %d; matches expected %d | Totals match too. \n", CATEGORY_LABELS[cat], y->scores[0][cat], cat+1);
         } else {
-            printf("\033[1;31m");
-            printf("✘ ");
-            printf("\033[0m");
+            print_cross();
             printf("Updated %-15ls <- %d, but the expected total is %d \n", CATEGORY_LABELS[cat], y->scores[0][cat], cat+1);
 
         }
@@ -185,12 +181,17 @@ void set_dice(Yahtzee *y, int d1, int d2, int d3, int d4, int d5) {
 }
 
 void test_scoring_driver() {
+    printf("\n\n\n ---- Testing scoring ----\n");
     srand(time(NULL));
     Yahtzee game = init_yahtzee(1, 0b0);
     game.round = 0;
     game.curPlayer = 0;
     Yahtzee* y = &game;
     set_dice(y, 1, 1, 1, 1, 1);
+    update_ephemeral(y);
+    print_buffer_score(game);
+
+    y->scores[0][YAHTZEE] = 50;
     update_ephemeral(y);
     print_buffer_score(game);
 

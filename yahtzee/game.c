@@ -137,8 +137,7 @@ bool is_continuous(int occurrences[NUM_DIE_FACES], int start, int length) {
 
     assert(start < NUM_DIE_FACES);
     assert(start + length <= NUM_DIE_FACES);
-
-    bool isContinuous = true;
+    
     for (int face = 0; face < start+length; face++) {
         if (occurrences[face] == 0) return false;
     }

@@ -213,15 +213,15 @@ void update_ephemeral(Yahtzee* y) {
 
     // Full house
     if (score[FULL_HOUSE] == NOT_CHOSEN)
-        y->bufferScore[FULL_HOUSE] = has_full_house(diceOccurrences) || has_yahtzee(diceOccurrences) ? POINTS_FULL_HOUSE : 0;
+        y->bufferScore[FULL_HOUSE] = has_FULL_HOUSE(diceOccurrences) || has_YAHTZEE(diceOccurrences) ? POINTS_FULL_HOUSE : 0;
 
     // Straights/yahtzee
     if (score[LG_STRAIGHT] == NOT_CHOSEN)
-        y->bufferScore[LG_STRAIGHT] = has_large_straight(diceOccurrences) ? POINTS_LG_STRAIGHT : 0;
+        y->bufferScore[LG_STRAIGHT] = has_LG_STRAIGHT(diceOccurrences) ? POINTS_LG_STRAIGHT : 0;
     if (score[SM_STRAIGHT] == NOT_CHOSEN)
-        y->bufferScore[SM_STRAIGHT] = has_small_straight(diceOccurrences) ? POINTS_SM_STRAIGHT : 0;
+        y->bufferScore[SM_STRAIGHT] = has_SM_STRAIGHT(diceOccurrences) ? POINTS_SM_STRAIGHT : 0;
     if (score[YAHTZEE] == NOT_CHOSEN)
-        y->bufferScore[YAHTZEE] = has_yahtzee(diceOccurrences) ? POINTS_YAHTZEE : 0;
+        y->bufferScore[YAHTZEE] = has_YAHTZEE(diceOccurrences) ? POINTS_YAHTZEE : 0;
 
 }
 

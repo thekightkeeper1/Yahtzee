@@ -181,33 +181,47 @@ bool has_yahtzee(int occurrences[NUM_DIE_FACES]) {
 
 // Updates the ephemeral scoreboard during rolls
 void update_ephemeral(Yahtzee* y) {
-
     assert(y->curPlayer < y->numPlayers);
-    // First we tally up all the face values
+
+    // First we initilze every category to disabled. Can only be enabled if we haven't scored it already
+    const int* score = y->scores[y->curPlayer];
+    for (int cat = 0; cat < NUM_INTERACTIVE_CATEGORIES; cat++) {
+        y->bufferScore[cat] = CANT_CHOOSE;
+    }
+
+    // tally up all the face values
     int diceOccurrences[NUM_DIE_FACES] = {0};
     for (int curDie = 0; curDie< NUM_DICE; curDie++) {
         const int dieValue = y->dice[curDie];
         diceOccurrences[dieValue-1]++;
     }
+
     // calculating the upper scores
     for (int cat = ONES; cat < SIXES+1; cat++) {
-        y->bufferScore[cat] = diceOccurrences[cat] * (1 + cat); // Dice faces are 1 index, but cat is 0 index
+        if (score[cat] == NOT_CHOSEN)
+            y->bufferScore[cat] = diceOccurrences[cat] * (1 + cat); // Dice faces are 1 index, but cat is 0 index
     }
 
     // Computing the lower score section
     // Of a kind scores
     int threeFace, fourFace;
     of_a_kind_faces(diceOccurrences, &threeFace, &fourFace);
-    y->bufferScore[THREE_OF] = threeFace > -1 ?  (threeFace+1) * LEN_SM_STRAIGHT : 0;
-    y->bufferScore[FOUR_OF]  = fourFace  > -1 ?  (fourFace+1)  * LEN_LG_STRAIGHT : 0;
+    if (score[THREE_OF] == NOT_CHOSEN)
+        y->bufferScore[THREE_OF] = threeFace > -1 ?  (threeFace+1) * LEN_SM_STRAIGHT : 0;
+    if (score[FOUR_OF] == NOT_CHOSEN)
+        y->bufferScore[FOUR_OF]  = fourFace  > -1 ?  (fourFace+1)  * LEN_LG_STRAIGHT : 0;
 
     // Full house
-    y->bufferScore[FULL_HOUSE] = has_full_house(diceOccurrences) || has_yahtzee(diceOccurrences) ? POINTS_FULL_HOUSE : 0;
+    if (score[FULL_HOUSE] == NOT_CHOSEN)
+        y->bufferScore[FULL_HOUSE] = has_full_house(diceOccurrences) || has_yahtzee(diceOccurrences) ? POINTS_FULL_HOUSE : 0;
 
     // Straights/yahtzee
-    y->bufferScore[LG_STRAIGHT] = has_large_straight(diceOccurrences) ? POINTS_LG_STRAIGHT : 0;
-    y->bufferScore[SM_STRAIGHT] = has_small_straight(diceOccurrences) ? POINTS_SM_STRAIGHT : 0;
-    y->bufferScore[YAHTZEE] = has_yahtzee(diceOccurrences) ? POINTS_YAHTZEE : 0;
+    if (score[LG_STRAIGHT] == NOT_CHOSEN)
+        y->bufferScore[LG_STRAIGHT] = has_large_straight(diceOccurrences) ? POINTS_LG_STRAIGHT : 0;
+    if (score[SM_STRAIGHT] == NOT_CHOSEN)
+        y->bufferScore[SM_STRAIGHT] = has_small_straight(diceOccurrences) ? POINTS_SM_STRAIGHT : 0;
+    if (score[YAHTZEE] == NOT_CHOSEN)
+        y->bufferScore[YAHTZEE] = has_yahtzee(diceOccurrences) ? POINTS_YAHTZEE : 0;
 
 }
 

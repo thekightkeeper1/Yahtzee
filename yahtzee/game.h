@@ -20,6 +20,7 @@
 #define POINTS_YAHTZEE 50
 
 #define NOT_CHOSEN (-1)
+#define CANT_CHOOSE (-1)
 #define CHOOSE_SCORE (0b11100000) // u_int8_t
 
 typedef enum {

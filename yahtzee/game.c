@@ -230,25 +230,6 @@ void update_ephemeral(Yahtzee* y) {
 
 }
 
-void ai_take_turn(Yahtzee *y) {
-
-	CATEGORIES chosen;
-	for (int i = 0; i < MAX_ROLLS; i++) {
-
-		roll_dice(y);  // Goes first
-		update_ephemeral(y);
-
-		const u_int8_t locked = ai_choose_locked(*y, &chosen);
-		if (locked == CHOOSE_SCORE) {  // Required check before using toggle_dice
-			break;
-		}
-
-		toggle_dice(y, locked);
-	}
-	update_score(y, chosen);
-	advance_player(y);
-}
-
 u_int8_t ai_choose_locked(const Yahtzee y, CATEGORIES *chosen) {
 	// Caching info
 	const DiceInfo dInfo = get_occurrence_info(y.dice);
@@ -355,3 +336,4 @@ DiceInfo get_occurrence_info(const dice_t dice) {
 
 	return diceInfo;
 }
+

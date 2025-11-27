@@ -1,11 +1,10 @@
-#include  "game.h"
+#include "testing.h"
+#include <assert.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <time.h>
-#include <stdbool.h>
-#include "testing.h"
-
-#include <assert.h>
 #include <wchar.h>
+#include  "game.h"
 
 
 wstr_t CATEGORY_LABELS[NUM_CATEGORIES] = {
@@ -50,7 +49,9 @@ void test_game_driver() {
         printf("--- Round %d  Player %d/%d --- \n", y->round+1, y->curPlayer+1, y->numPlayers);
 
         // This is the dice rolling loop that should always be used for well-defined behavior
+        y->currentRoll = 0;
         for (int i = 0; i < MAX_ROLLS; i++) {
+            printf("rolling %d\n", i);
             roll_dice(y);  // Goes first
 
             const u_int8_t locked = lock_sixes(game.dice); // Replace function with user interaction
@@ -60,7 +61,7 @@ void test_game_driver() {
             if (locked & CHOOSE_SCORE) {
                 // The above checks if they had the same exact bits.
                 // This checks if any of the bits on the locked dice are out of range
-                // This doesnt really need to be checked here, its just a usage note
+                // This doesn't really need to be checked here, it's just a usage note
                 printf("Developer accidentally used the wrong bits, exiting.");
                 exit(1);
             }
@@ -72,6 +73,61 @@ void test_game_driver() {
         advance_player(y);
     }
         print_scoreboard(game);
+}
+
+void test_ai() {
+    // Init the game and then start it.
+    // Starting it just advances current round and current player fromm -1 --> 0; You could do this manually too
+    srand(time(NULL));
+    Yahtzee game = init_yahtzee(2, 0b11);
+    Yahtzee* y = &game;
+    advance_player(y);
+
+    // This is the game loop that should always be followed for well-defined behavior
+    while (!is_over(game)) {
+        printf("--- Round %d  Player %d/%d --- \n", y->round+1, y->curPlayer+1, y->numPlayers);
+
+        // This is the dice rolling loop that should always be used for well-defined behavior
+        CATEGORIES chosen;
+        printf("Rolling:\n");
+        for (int i = 0; i < MAX_ROLLS; i++) {
+            roll_dice(y);  // Goes first
+            print_dice(*y);
+            u_int8_t locked;
+            if (ai_is_turn(*y) ){
+                locked = ai_choose_locked(*y, &chosen);
+            } else {
+                // Shouldnt have gotten here;
+               assert(false);
+            }
+            if (locked == CHOOSE_SCORE) {
+                printf("found something ig\n");
+                break;
+            }
+            if (locked & CHOOSE_SCORE) {
+                // The above checks if they had the same exact bits.
+                // This checks if any of the bits on the locked dice are out of range
+                // This doesn't really need to be checked here, its just a usage note
+                getchar();
+                printf("Developer accidentally used the wrong bits, exiting.");
+                exit(1);
+            }
+            toggle_dice(y, locked);
+            print_dice(*y);
+            printf("\n");
+        }
+        printf(" \n");
+        if (ai_is_turn(*y)) {
+            // Already got the AI to choose something
+        } else {
+            chosen = y->round;  // Replace with user interaction
+        }
+
+        update_score(y, chosen);
+        print_dice(game);  // Replace with anything to display what the user did on their turn.
+        advance_player(y);
+    }
+    print_scoreboard(game);
 }
 
 void print_check() {
@@ -165,12 +221,11 @@ void test_score_updating() {
 }
 
 void test_dice(Yahtzee* y, u_int8_t toLock, bool resetRolls) {
-    y->currentRoll = resetRolls ? 0 : y->currentRoll;
     y->locked_dice = toLock;
+    y->currentRoll = resetRolls ? 0 : y->currentRoll;
     roll_dice(y);
     print_dice(*y);
 }
-
 
 void set_dice(Yahtzee *y, int d1, int d2, int d3, int d4, int d5) {
   y->dice[0] = d1;
@@ -191,6 +246,7 @@ void test_scoring_driver() {
     update_ephemeral(y);
     print_buffer_score(game);
 
+    printf("\nChose yahtzee, so it should be disabled now\n");
     y->scores[0][YAHTZEE] = 50;
     update_ephemeral(y);
     print_buffer_score(game);
@@ -220,12 +276,12 @@ void test_dice_driver() {
 
     // Testing more than three
     printf("\nTesting that it lets me do only 3\n");
+    y.currentRoll = 0;
     test_dice(&y, 0b0, true);
     test_dice(&y, 0b0, false);
     test_dice(&y, 0b0, false);
     test_dice(&y, 0b0, false);
 }
-
 
 // Runs some basic testing stuff. Pass args to it to test particular things?
 int main(int argc, char *argv[]) {
@@ -255,6 +311,10 @@ int main(int argc, char *argv[]) {
             break;
         case 5:
             test_game_driver();
+            break;
+        case 6:
+            printf("Boutta test it mate");
+            test_ai();
             break;
         default:
             break;

@@ -1,11 +1,9 @@
-#include <stdio.h>
-#include <locale.h>
 #include "main.h"
-#include "tui.h"
-#include "game_tui.h"
+#include <locale.h>
+#include <stdio.h>
 #include <ncursesw/ncurses.h>
-
-
+#include "game_tui.h"
+#include "tui.h"
 
 
 int main(void) {

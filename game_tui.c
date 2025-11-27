@@ -68,7 +68,7 @@ Table alloc_score_table(const wstr_t *playerNames, const int numPlayers) {
 				continue;
 			}
 
-			// Default case where it isnt a label, and the score is 0
+			// Default case where it isn't a label, and the score is 0
 			// Allocating room for the actual string
 			columns[c][r] = (wstr_t) malloc(sizeof(wchar_t) * 4); // Max yahzee score only have 4 digits + \0
 

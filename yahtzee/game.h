@@ -24,23 +24,23 @@
 #define CHOOSE_SCORE (0b11100000) // u_int8_t
 
 typedef enum {
-    ONES,
-    TWOS,
-    THREES,
-    FOURS,
-    FIVES,
-    SIXES,
-    THREE_OF,
-    FOUR_OF,
-    FULL_HOUSE,
-    SM_STRAIGHT,
-    LG_STRAIGHT,
-    YAHTZEE,
+	ONES,
+	TWOS,
+	THREES,
+	FOURS,
+	FIVES,
+	SIXES,
+	THREE_OF,
+	FOUR_OF,
+	FULL_HOUSE,
+	SM_STRAIGHT,
+	LG_STRAIGHT,
+	YAHTZEE,
 
-    // This begins the none-interactive scores. Instead calculated by the scoring program
-    UPPER_TOTAL,
-    LOWER_TOTAL,
-    COMPLETE_TOTAL,
+	// This begins the none-interactive scores. Instead calculated by the scoring program
+	UPPER_TOTAL,
+	LOWER_TOTAL,
+	COMPLETE_TOTAL,
 } CATEGORIES;
 
 #define DIE_1 0b00001
@@ -49,30 +49,58 @@ typedef enum {
 #define DIE_4 0b01000
 #define DIE_5 0b10000
 
+typedef int dice_t[NUM_DICE];
+
 typedef struct {
-    /* State for the entire game */
-    int numPlayers;
-    int** scores;  // First index is the player, second is the particular score
+	/* State for the entire game */
+	int numPlayers;
+	int **scores; // First index is the player, second is the particular score
+	unsigned int isAI;
 
-    /* Ephemeral state for each turn */
-    int* bufferScore; // The theoretical score you can get for each category between rolls
-    int curPlayer;  // The index of the turn player
-    int dice[NUM_DICE];
-    int currentRoll; // Shows how many times the dice have been rolled this turn
-    int round;
-    u_int8_t locked_dice;
-
+	/* Ephemeral state for each turn */
+	int *bufferScore; // The theoretical score you can get for each category between rolls
+	int curPlayer; // The index of the turn player
+	int dice[NUM_DICE];
+	int currentRoll; // Shows how many times the dice have been rolled this turn
+	int round;
+	u_int8_t locked_dice;
 } Yahtzee;
+
+typedef struct {
+	int occurrences[NUM_DIE_FACES]; // Alternatively, gives the length of each nested array in the matrix below
+	int positions[NUM_DIE_FACES][NUM_DICE]; // A reverse mapping, of occurences
+} DiceInfo;
 
 /* Functions */
 Yahtzee init_yahtzee(int numPlayers, u_int64_t isAI);
+
 void end_yahtzee(Yahtzee y);
-void roll_dice(Yahtzee* y);
-void update_ephemeral(Yahtzee* y);
-bool update_score(const Yahtzee* y, int category);
-void advance_player(Yahtzee* y);
+
+void roll_dice(Yahtzee *y);
+
+void update_ephemeral(Yahtzee *y);
+
+bool update_score(const Yahtzee *y, int category);
+
+void advance_player(Yahtzee *y);
+
 bool is_over(Yahtzee y);
-void toggle_dice(Yahtzee* y, u_int8_t toToggle);
+
+void toggle_dice(Yahtzee *y, u_int8_t toToggle);
+
+DiceInfo get_occurrence_info(const dice_t dice);
+
+void get_reachable_hands(Yahtzee y, CATEGORIES reachable[NUM_INTERACTIVE_CATEGORIES], int *n);
+
+u_int8_t toggle_with_face(Yahtzee y, DiceInfo dInfo, int face);
+
+CATEGORIES chose_max_of_buffer(Yahtzee y);
+
+void ai_take_turn(Yahtzee *y);
+
+u_int8_t ai_choose_locked(Yahtzee y, CATEGORIES *chosen);
+
+bool ai_is_turn(Yahtzee y);
 
 
 #endif // GAME_H

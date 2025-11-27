@@ -148,10 +148,7 @@ void draw_table(const Table t) {
         mvaddwstr(t.y,         rightEdgeX, L"╮");
         mvaddwstr(bottomEdgeY, t.x,        L"╰");
         mvaddwstr(t.y,         t.x,        L"╭");
-
-        
     }
-    
 }
 
 void draw_table_data(const Table t) {

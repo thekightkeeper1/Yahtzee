@@ -328,6 +328,16 @@ u_int8_t ai_choose_locked(const Yahtzee y, CATEGORIES *chosen) {
 	 * without compromising our current best score
 	 */
 
+	// The first case is we can go for some sort of straight
+	if (score[SM_STRAIGHT] == NOT_CHOSEN || score[LG_STRAIGHT] == NOT_CHOSEN ) {
+		u_int8_t toLock;
+		if ((toLock = best_straight(y.dice, dInfo)) != 0) {
+			// WE have a decent chance at making a straight given that those dice are locked
+			return toLock ^ y.locked_dice;
+		}
+		// Otherwise its no worth going for a straight
+
+	}
 
 	// Handling multiple dice in a row:
 	// Its simple, you just lock them in, then choose the highest score we can

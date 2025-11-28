@@ -167,14 +167,16 @@ bool has_SM_STRAIGHT(int occurrences[NUM_DIE_FACES]) {
 	return false;
 }
 
-// Returns the highest face with 3, and the highest face with 4 occurrences
-void of_a_kind_faces(const int occurrences[NUM_DIE_FACES], int *three, int *four) {
-	*three = -1;
-	*four = -1;
+// Returns number of dice repeated, and sets the total to the sum of all faces
+int of_a_kind_faces(const int occurrences[NUM_DIE_FACES], int *sum) {
+	*sum = 0;
+	int result = 0;
 	for (int face = 0; face < NUM_DIE_FACES; face++) {
-		if (occurrences[face] >= 3) *three = face;
-		if (occurrences[face] >= 4) *four = face;
+		if (occurrences[face] == 3) result = 3;
+		if (occurrences[face] >= 4) result = 4;
+		*sum += (face+1) * occurrences[face];
 	}
+	return result;
 }
 
 bool has_YAHTZEE(const int occurrences[NUM_DIE_FACES]) {
@@ -209,12 +211,12 @@ void update_ephemeral(Yahtzee* y) {
 
     // Computing the lower score section
     // Of a kind scores
-    int threeFace, fourFace;
-    of_a_kind_faces(diceOccurrences, &threeFace, &fourFace);
-    if (score[THREE_OF] == NOT_CHOSEN)
-        y->bufferScore[THREE_OF] = threeFace > -1 ?  (threeFace+1) * LEN_SM_STRAIGHT : 0;
-    if (score[FOUR_OF] == NOT_CHOSEN)
-        y->bufferScore[FOUR_OF]  = fourFace  > -1 ?  (fourFace+1)  * LEN_LG_STRAIGHT : 0;
+    int total;
+    const int maxRepeated = of_a_kind_faces(diceOccurrences, &total);
+    if (score[FOUR_OF] == NOT_CHOSEN && maxRepeated == 4)
+        y->bufferScore[FOUR_OF] = total;
+    if (score[THREE_OF] == NOT_CHOSEN && maxRepeated > 3)
+        y->bufferScore[THREE_OF] = total;
 
     // Full house
     if (score[FULL_HOUSE] == NOT_CHOSEN)

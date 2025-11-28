@@ -122,7 +122,7 @@ void roll_dice(Yahtzee *y) {
 	update_ephemeral(y);
 }
 
-bool has_FULL_HOUSE(int occurrences[NUM_DIE_FACES]) {
+bool has_FULL_HOUSE(const int occurrences[NUM_DIE_FACES]) {
 	// A full house should have exactly 3 of one dice, and 2 of another
 	int three = 0;
 	int two = 0;
@@ -141,7 +141,7 @@ bool has_FULL_HOUSE(int occurrences[NUM_DIE_FACES]) {
 	return false;
 }
 
-bool is_continuous(int occurrences[NUM_DIE_FACES], int start, int length) {
+bool is_continuous(const int occurrences[NUM_DIE_FACES], int start, int length) {
 	assert(start < NUM_DIE_FACES);
 	assert(start + length <= NUM_DIE_FACES);
 
@@ -168,7 +168,7 @@ bool has_SM_STRAIGHT(int occurrences[NUM_DIE_FACES]) {
 }
 
 // Returns the highest face with 3, and the highest face with 4 occurrences
-void of_a_kind_faces(int occurrences[NUM_DIE_FACES], int *three, int *four) {
+void of_a_kind_faces(const int occurrences[NUM_DIE_FACES], int *three, int *four) {
 	*three = -1;
 	*four = -1;
 	for (int face = 0; face < NUM_DIE_FACES; face++) {
@@ -177,7 +177,7 @@ void of_a_kind_faces(int occurrences[NUM_DIE_FACES], int *three, int *four) {
 	}
 }
 
-bool has_YAHTZEE(int occurrences[NUM_DIE_FACES]) {
+bool has_YAHTZEE(const int occurrences[NUM_DIE_FACES]) {
 	for (int face = 0; face <= NUM_DIE_FACES; face++) {
 		if (occurrences[face] == 5) return true;
 	}
@@ -253,8 +253,7 @@ u_int8_t ai_choose_locked(const Yahtzee y, CATEGORIES *chosen) {
 		return FULL_HOUSE;
 	}
 
-	if (y.bufferScore[SM_STRAIGHT] > 0 && score[LG_STRAIGHT] > 0) { //TODO
-		// Worthless to reroll if we can't get a large straight
+	if (y.bufferScore[SM_STRAIGHT] > 0 && score[LG_STRAIGHT] > 0 && y.currentRoll) { // Dont choose yet if we have rerolls left
 		*chosen = SM_STRAIGHT;
 		return SM_STRAIGHT;
 	}

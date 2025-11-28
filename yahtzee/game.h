@@ -11,8 +11,8 @@
 #define NUM_DICE 5
 #define NUM_DIE_FACES 6
 
-#define LEN_LG_STRAIGHT 4
-#define LEN_SM_STRAIGHT 3
+#define LEN_LG_STRAIGHT 5
+#define LEN_SM_STRAIGHT 4
 
 #define POINTS_FULL_HOUSE 25
 #define POINTS_SM_STRAIGHT 30

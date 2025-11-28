@@ -230,6 +230,68 @@ void update_ephemeral(Yahtzee* y) {
 
 }
 
+
+void bubble_sort(int *array, int length) {
+	for (int pass = 0; pass < length - 1; pass++)
+		for (int index = 0; index < length - pass - 1; index++)
+
+			// If this is greater than the next
+			if (array[index] > array[index + 1]) {
+				// Swapping
+				int temp = array[index];
+				array[index] = array[index + 1];
+				array[index + 1] = temp;
+			}
+}
+
+// Returns dice indicies if there is a straight starting not from an index, but a dice facevalue
+u_int8_t best_straight(const dice_t dice, DiceInfo dInfo) {
+
+	// First we sort dice, so we can use the property that each die should be sequential
+	int sorted[NUM_DICE];
+	for (int i = 0; i < NUM_DICE; i++) {
+		sorted[i] = dice[i];
+	}
+	bubble_sort(sorted, NUM_DICE);
+
+	// Next we just use each die face as starting position and check for a
+	// We don't care about: straight <= 2  or if straight == 3 but it is on either edge, starting at one or ending at 6
+	int maxLength = 1;
+	int maxStart = 0;
+	const int (*positions)[5] = dInfo.positions;
+	u_int8_t toLock = 0;
+	for (int start = 0; start < NUM_DICE; start++) {
+		int prev = sorted[start]; // Previous face initilzer, used for the
+		toLock = 1 << positions[prev][0];
+		int len = 1;
+		for (int i = start + 1; i < NUM_DICE; i++) {
+			if (sorted[i] == prev) { // Skip repeated values
+				continue;
+			}
+			if (prev == sorted[i] - 1) {
+				toLock |= 1 << positions[prev][0];
+				len++;
+				prev = sorted[i];
+			} else {
+				break;
+			}
+		}
+
+		if (len > maxLength) {
+			maxStart = start;
+			maxLength = len;
+		}
+	}
+	if (maxLength < 3) return 0;
+	if (maxLength == 3) {
+		assert(dice[maxStart] < 5);
+		assert(dice[maxStart] != 3);
+		if (dice[maxStart] == 1 || dice[maxStart == NUM_DIE_FACES - 2]) return 0; // The straights dont have edges open
+	}
+	assert(toLock != 0);
+	return toLock;
+}
+
 u_int8_t ai_choose_locked(const Yahtzee y, CATEGORIES *chosen) {
 	// Caching info
 	const DiceInfo dInfo = get_occurrence_info(y.dice);

@@ -27,12 +27,6 @@ void advance_player(Yahtzee *y) {
 	y->currentRoll = 0;
 }
 
-bool ai_is_turn(const Yahtzee y) {
-	if (y.isAI & ( 1 << y.curPlayer)) {
-		return true;
-	}
-	return false;
-}
 
 // Returns true if all the scores have been filled and no more players should take their turn
 // YOU MUST ADVANCE PLAYER BEFORE CALLING THIS, IT DOESNT DETECT ANYTHING BEFORE ADVANCING PLAYER
@@ -196,42 +190,51 @@ void update_ephemeral(Yahtzee* y) {
         y->bufferScore[cat] = CANT_CHOOSE;
     }
 
-    // tally up all the face values
-    int diceOccurrences[NUM_DIE_FACES] = {0};
-    for (int curDie = 0; curDie< NUM_DICE; curDie++) {
-        const int dieValue = y->dice[curDie];
-        diceOccurrences[dieValue-1]++;
-    }
+	DiceInfo dInfo = get_occurrence_info(y->dice);
+
 
     // calculating the upper scores
     for (int cat = ONES; cat < SIXES+1; cat++) {
         if (score[cat] == NOT_CHOSEN)
-            y->bufferScore[cat] = diceOccurrences[cat] * (1 + cat); // Dice faces are 1 index, but cat is 0 index
+            y->bufferScore[cat] = dInfo.occurrences[cat] * (1 + cat); // Dice faces are 1 index, but cat is 0 index
     }
 
     // Computing the lower score section
+	if (score[YAHTZEE] == NOT_CHOSEN)
+		y->bufferScore[YAHTZEE] = has_YAHTZEE(dInfo.occurrences) ? POINTS_YAHTZEE : 0;
     // Of a kind scores
     int total;
-    const int maxRepeated = of_a_kind_faces(diceOccurrences, &total);
-    if (score[FOUR_OF] == NOT_CHOSEN && maxRepeated == 4)
-        y->bufferScore[FOUR_OF] = total;
-    if (score[THREE_OF] == NOT_CHOSEN && maxRepeated > 3)
-        y->bufferScore[THREE_OF] = total;
+    const int maxRepeated = of_a_kind_faces(dInfo.occurrences, &total);
+    if (score[FOUR_OF] == NOT_CHOSEN) {
+    	// We know it is open to choose
+    	y->bufferScore[FOUR_OF] = 0;
+
+    	// This checks that we can actually get any points for it
+	    if (maxRepeated == 4) y->bufferScore[FOUR_OF] = total;
+    }
+    if (score[THREE_OF] == NOT_CHOSEN) {
+		// We know it is open to choose
+		y->bufferScore[THREE_OF] = 0;
+
+		// This checks that we can actually get any points for it
+		if (maxRepeated == 4) y->bufferScore[THREE_OF] = total;
+    }
 
     // Full house
     if (score[FULL_HOUSE] == NOT_CHOSEN)
-        y->bufferScore[FULL_HOUSE] = has_FULL_HOUSE(diceOccurrences) || has_YAHTZEE(diceOccurrences) ? POINTS_FULL_HOUSE : 0;
+        y->bufferScore[FULL_HOUSE] = has_FULL_HOUSE(dInfo.occurrences) || has_YAHTZEE(dInfo.occurrences) ? POINTS_FULL_HOUSE : 0;
 
     // Straights/yahtzee
+	int lengthStraight = 0;
+	best_straight(y->dice, get_occurrence_info(y->dice), &lengthStraight);
+	assert (0 <= lengthStraight && lengthStraight <= NUM_DICE);
     if (score[LG_STRAIGHT] == NOT_CHOSEN)
-        y->bufferScore[LG_STRAIGHT] = has_LG_STRAIGHT(diceOccurrences) ? POINTS_LG_STRAIGHT : 0;
+        y->bufferScore[LG_STRAIGHT] = lengthStraight == LEN_LG_STRAIGHT ? POINTS_LG_STRAIGHT : 0;
     if (score[SM_STRAIGHT] == NOT_CHOSEN)
-        y->bufferScore[SM_STRAIGHT] = has_SM_STRAIGHT(diceOccurrences) ? POINTS_SM_STRAIGHT : 0;
-    if (score[YAHTZEE] == NOT_CHOSEN)
-        y->bufferScore[YAHTZEE] = has_YAHTZEE(diceOccurrences) ? POINTS_YAHTZEE : 0;
+        y->bufferScore[SM_STRAIGHT] = lengthStraight >= LEN_SM_STRAIGHT ? POINTS_SM_STRAIGHT : 0;
+
 
 }
-
 
 void bubble_sort(int *array, int length) {
 	for (int pass = 0; pass < length - 1; pass++)
@@ -246,8 +249,8 @@ void bubble_sort(int *array, int length) {
 			}
 }
 
-// Returns dice indicies if there is a straight starting not from an index, but a dice facevalue
-u_int8_t best_straight(const dice_t dice, DiceInfo dInfo) {
+// Returns dice indicies if there is a straight starting not from an index, but a die facevalue
+u_int8_t best_straight(const dice_t dice, DiceInfo dInfo, int *length) {
 
 	// First we sort dice, so we can use the property that each die should be sequential
 	int sorted[NUM_DICE];
@@ -256,116 +259,50 @@ u_int8_t best_straight(const dice_t dice, DiceInfo dInfo) {
 	}
 	bubble_sort(sorted, NUM_DICE);
 
-	// Next we just use each die face as starting position and check for a
-	// We don't care about: straight <= 2  or if straight == 3 but it is on either edge, starting at one or ending at 6
-	int maxLength = 1;
-	int maxStart = 0;
+	// Use each index as a start, and see how long the straight there is
+	int start = 0; // Starting position of the straight that we are considering
+	int i = 1;
+	int prev = sorted[start]; // Previous face for the below loop
 	const int (*positions)[5] = dInfo.positions;
-	u_int8_t toLock = 0;
-	for (int start = 0; start < NUM_DICE; start++) {
-		int prev = sorted[start]; // Previous face initilzer, used for the
-		toLock = 1 << positions[prev][0];
-		int len = 1;
-		for (int i = start + 1; i < NUM_DICE; i++) {
-			if (sorted[i] == prev) { // Skip repeated values
-				continue;
-			}
-			if (prev == sorted[i] - 1) {
-				toLock |= 1 << positions[prev][0];
-				len++;
-				prev = sorted[i];
-			} else {
-				break;
-			}
-		}
+	u_int8_t toLock = 1 << positions[prev-1][0]; // tracks the the real index of dice, not the index in the sorted array
+	*length = 1; // The starting die is always itself correct, so we at least have one
 
-		if (len > maxLength) {
-			maxStart = start;
-			maxLength = len;
+	while (start + i < NUM_DICE /* && start < NUM_DICE - 2 */) {
+		// toLock = 1 << positions[prev-1][start];
+		const int cur = sorted[i];
+
+		if (cur == prev) {
+			// Skip repeated values
+			i++;
+			continue;
 		}
+		if (prev == cur - 1) { // Increment the length for sequential values
+			toLock |= 1 << positions[cur-1][0];
+			(*length)++;
+			prev = sorted[i];
+		} else {
+			// Reset the straight for non-sequential value
+			if (*length < 3) {
+				*length = 1;
+				toLock |= 1 << positions[cur][0];
+				start += i;
+			}
+		}
+		i++;
 	}
-	if (maxLength < 3) return 0;
-	if (maxLength == 3) {
-		assert(dice[maxStart] < 5);
-		assert(dice[maxStart] != 3);
-		if (dice[maxStart] == 1 || dice[maxStart == NUM_DIE_FACES - 2]) return 0; // The straights dont have edges open
+	// printf("It failed with: %d %d %d %d %d | len: %d\n", dice[0], dice[1], dice[2], dice[3], dice[4], *length);
+	if (*length < 3) return 0;
+	if (*length == LEN_LG_STRAIGHT) { // We have all 5 die locked into place
+		return toLock;
 	}
-	assert(toLock != 0);
+	if (*length == LEN_LG_STRAIGHT-1) { // We only need to roll one more die
+		return toLock;
+	}
+
+	// Otherwise it is 3 <= len < LEN_LG_STRAIGHT
+	assert(sorted[start] < 5); // If the first face in the straight was 5, then the straight couldnt have been longer than 3
+	if (sorted[start] == 1 || sorted[start] == NUM_DIE_FACES - 2) return 0; // The straights dont have edges open
 	return toLock;
-}
-
-u_int8_t ai_choose_locked(const Yahtzee y, CATEGORIES *chosen) {
-	// Caching info
-	const DiceInfo dInfo = get_occurrence_info(y.dice);
-	const int curPlayer = y.curPlayer;
-	const int *score = y.scores[curPlayer];
-
-
-	// Handling all the lower section items first, since they tend to yield lots of points from rare configurations
-	if (y.bufferScore[YAHTZEE] > 0 ) {
-		*chosen = YAHTZEE;
-		return YAHTZEE;
-	}
-
-	if (y.bufferScore[LG_STRAIGHT] > 0) {
-		*chosen = LG_STRAIGHT;
-		return LG_STRAIGHT;
-	}
-
-	if (y.bufferScore[FULL_HOUSE] > 0) {
-		*chosen = FULL_HOUSE;
-		return FULL_HOUSE;
-	}
-
-	if (y.bufferScore[SM_STRAIGHT] > 0 && score[LG_STRAIGHT] > 0 && y.currentRoll) { // Dont choose yet if we have rerolls left
-		*chosen = SM_STRAIGHT;
-		return SM_STRAIGHT;
-	}
-
-
-	/* Now we are checking things that might lock in,
-	 * since we can use rerolls for even better results
-	 * without compromising our current best score
-	 */
-
-	// The first case is we can go for some sort of straight
-	if (score[SM_STRAIGHT] == NOT_CHOSEN || score[LG_STRAIGHT] == NOT_CHOSEN ) {
-		u_int8_t toLock;
-		if ((toLock = best_straight(y.dice, dInfo)) != 0) {
-			// WE have a decent chance at making a straight given that those dice are locked
-			return toLock ^ y.locked_dice;
-		}
-		// Otherwise its no worth going for a straight
-
-	}
-
-	// Handling multiple dice in a row:
-	// Its simple, you just lock them in, then choose the highest score we can
-	for (int threshold = 4; threshold > 0; threshold--) {
-		for (int face = NUM_DIE_FACES; face > 0 ; face--) {
-			if (y.currentRoll == MAX_ROLLS) {
-				*chosen = chose_max_of_buffer(y);
-				return CHOOSE_SCORE;
-			}
-
-			// Now we just lock in the higest occuring die that we can
-			if (dInfo.occurrences[face-1] == threshold) {
-				u_int8_t to_toggle = toggle_with_face(y, dInfo, face-1);
-				return to_toggle;
-			}
-		}
-	}
-	assert(false);
-}
-
-CATEGORIES chose_max_of_buffer(const Yahtzee y) {
-	int max = ONES;
-	for (int cat = 0; cat < NUM_INTERACTIVE_CATEGORIES; cat++) {
-		if (y.bufferScore[cat] > y.bufferScore[max]) {
-			max = cat;
-		}
-	}
-	return max;
 }
 
 u_int8_t toggle_with_face(const Yahtzee y, const DiceInfo dInfo, const int face) {

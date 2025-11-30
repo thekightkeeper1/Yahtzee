@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <wchar.h>
+#include "ai.h"
 #include  "game.h"
 
 
@@ -75,11 +76,44 @@ void test_game_driver() {
         print_scoreboard(game);
 }
 
+int game_total() {
+
+    Yahtzee game = init_yahtzee(1, 0b11);
+    Yahtzee* y = &game;
+    advance_player(y);
+
+    while (!is_over(game)) {
+        CATEGORIES chosen;
+        for (int i = 0; i < MAX_ROLLS; i++) {
+            roll_dice(y);  // Goes first always
+            u_int8_t locked = 0b11111111;
+            if (ai_is_turn(*y) ){
+                locked = ai_choose_locked(*y);
+            };
+            if (locked == CHOOSE_SCORE) {
+                break;
+            }
+            toggle_dice(y, locked);
+        }
+        if (ai_is_turn(*y)) {
+            chosen = ai_choose_score(*y);
+        } else {
+            assert(false);
+        }
+
+        update_score(y, chosen);
+        advance_player(y);
+    }
+    int total = y->scores[0][COMPLETE_TOTAL];
+    end_yahtzee(*y);
+    return total;
+}
+
 void test_ai() {
     // Init the game and then start it.
     // Starting it just advances current round and current player fromm -1 --> 0; You could do this manually too
     srand(time(NULL));
-    Yahtzee game = init_yahtzee(2, 0b11);
+    Yahtzee game = init_yahtzee(1, 0b11);
     Yahtzee* y = &game;
     advance_player(y);
 
@@ -91,43 +125,56 @@ void test_ai() {
         CATEGORIES chosen;
         printf("Rolling:\n");
         for (int i = 0; i < MAX_ROLLS; i++) {
-            roll_dice(y);  // Goes first
+            roll_dice(y);  // Goes first always
             print_dice(*y);
             u_int8_t locked;
             if (ai_is_turn(*y) ){
-                locked = ai_choose_locked(*y, &chosen);
+                locked = ai_choose_locked(*y);
             } else {
-                // Shouldnt have gotten here;
+                // This test case shouldn't have detected playable characters;
                assert(false);
             }
             if (locked == CHOOSE_SCORE) {
-                printf("found something ig\n");
+                printf("Choosing: ");
                 break;
             }
             if (locked & CHOOSE_SCORE) {
                 // The above checks if they had the same exact bits.
                 // This checks if any of the bits on the locked dice are out of range
                 // This doesn't really need to be checked here, its just a usage note
+                printf("Developer accidentally used the wrong bits, press anything to exit.");
                 getchar();
-                printf("Developer accidentally used the wrong bits, exiting.");
                 exit(1);
             }
             toggle_dice(y, locked);
             print_dice(*y);
-            printf("\n");
         }
-        printf(" \n");
+        // Now we get to choosing the actual score
         if (ai_is_turn(*y)) {
-            // Already got the AI to choose something
+            chosen = ai_choose_score(*y);
         } else {
-            chosen = y->round;  // Replace with user interaction
+            // This test case should not have playble characters
+            assert(false);
         }
+        printf("%ls for %d points.\n", CATEGORY_LABELS[chosen], y->bufferScore[chosen]);
+        printf(" \n");
 
         update_score(y, chosen);
-        print_dice(game);  // Replace with anything to display what the user did on their turn.
+        // print_dice(game);  // Replace with anything to display what the user did on their turn.
         advance_player(y);
+        printf("\n");
     }
     print_scoreboard(game);
+}
+
+void test_average() {
+    srand(time(NULL));
+    double total = 0;
+    const int numTimes = 1e4;
+    for (int i = 0; i < numTimes; ++i) {
+        total += game_total();
+    }
+    printf("\ntotal of 100 games: %.2lf\n", total / (double) numTimes);
 }
 
 void print_check() {
@@ -235,21 +282,70 @@ void set_dice(Yahtzee *y, int d1, int d2, int d3, int d4, int d5) {
   y->dice[4] = d5;
 }
 
-void test_scoring_driver() {
+void print_etc(Yahtzee *y, int dice, const char* msg, int scores, int cur_roll) {
+    printf("\n\n%s\n", msg);
+    y->currentRoll = cur_roll;
+    int d1 = dice / 1 % 10;
+    int d2 = dice / 10 % 10;
+    int d3 = dice / 100 % 10;
+    int d4 = dice / 1000 % 10;
+    int d5 = dice / 10000 % 10;
+
+    for (int cat = 0; cat < NUM_INTERACTIVE_CATEGORIES; cat++) {
+        y->scores[y->curPlayer][cat] = (scores >> cat )& 1;
+        if (y->scores[y->curPlayer][cat] == 0)
+            y->scores[y->curPlayer][cat] = NOT_CHOSEN;
+    }
+
+    set_dice(y, d1, d2, d3, d4, d5);
+    print_dice(*y);
+    update_ephemeral(y);
+    print_buffer_score(*y);
+    u_int8_t toLock =  ai_choose_locked(*y) ;
+
+
+    if (toLock == CHOOSE_SCORE) {
+        CATEGORIES categories = ai_choose_score(*y);
+        printf("AI choose: locked: N/A | category: %ls\n", CATEGORY_LABELS[categories]);
+    } else {
+        toLock ^=y->locked_dice;
+        int to_toggle = 0;
+        for (int i = 0; i < NUM_DICE; i++) {
+            to_toggle += (i+1) * (toLock >> i & 1);
+            to_toggle *= 10;
+        }
+        to_toggle /= 10;
+        printf("AI choose: locked: %d | category: N/A\n", to_toggle);
+    }
+
+}
+
+void test_update_ephemeral_driver() {
+    int score;
     printf("\n\n\n ---- Testing scoring ----\n");
     srand(time(NULL));
     Yahtzee game = init_yahtzee(1, 0b0);
     game.round = 0;
     game.curPlayer = 0;
     Yahtzee* y = &game;
-    set_dice(y, 1, 1, 1, 1, 1);
-    update_ephemeral(y);
-    print_buffer_score(game);
 
-    printf("\nChose yahtzee, so it should be disabled now\n");
-    y->scores[0][YAHTZEE] = 50;
-    update_ephemeral(y);
-    print_buffer_score(game);
+    print_etc(y, 66333, "Full House with rolls",  0, 2);
+    print_etc(y, 11111, "Yahtzee", 0b0, 1);
+    print_etc(y, 11111, "Yahtzee detects already filled score", 1<<YAHTZEE, 1);
+
+    print_etc(y, 11112, "Upper with re-rolls", 0, 1);
+    print_etc(y, 11112, "Upper without availble",  0b111111, 1);
+    print_etc(y, 11112, "Upper without re-rolls",  0, 3);
+    print_etc(y, 11112, "Upper without availble or re-rolls",  0b111111, 3);
+
+    print_etc(y, 66662, "high upper with re-rolls", 0, 1);
+    print_etc(y, 66662, "high upper without upper availble",  0b111111, 3);
+
+
+    print_etc(y, 23454, "SM STRAIGHT no rerolls", 0, 3);
+    print_etc(y, 23454, "SM STRAIGHT with re-rolls", 0, 1);
+    print_etc(y, 12341, "SM STRAIGHT on the edge", 0, 1);
+    print_etc(y, 12345, "LG straight", 0, 1);
 
 }
 
@@ -300,7 +396,7 @@ int main(int argc, char *argv[]) {
             test_dice_driver();
             break;
         case 2:
-            test_scoring_driver();
+            test_update_ephemeral_driver();
             break;
         case 3:
             test_score_updating();
@@ -316,6 +412,9 @@ int main(int argc, char *argv[]) {
             printf("Boutta test it mate");
             test_ai();
             break;
+        case 7:
+            printf("Testing average of 100 games of ai");
+            test_average();
         default:
             break;
     }

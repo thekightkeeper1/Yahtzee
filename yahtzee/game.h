@@ -30,8 +30,8 @@ typedef enum {
 	FOURS,
 	FIVES,
 	SIXES,
-	THREE_OF,
 	FOUR_OF,
+	THREE_OF,
 	FULL_HOUSE,
 	SM_STRAIGHT,
 	LG_STRAIGHT,
@@ -94,13 +94,6 @@ void get_reachable_hands(Yahtzee y, CATEGORIES reachable[NUM_INTERACTIVE_CATEGOR
 
 u_int8_t toggle_with_face(Yahtzee y, DiceInfo dInfo, int face);
 
-CATEGORIES chose_max_of_buffer(Yahtzee y);
-
-void ai_take_turn(Yahtzee *y);
-
-u_int8_t ai_choose_locked(Yahtzee y, CATEGORIES *chosen);
-
-bool ai_is_turn(Yahtzee y);
-
+u_int8_t best_straight(const dice_t dice, DiceInfo dInfo, int* length);
 
 #endif // GAME_H

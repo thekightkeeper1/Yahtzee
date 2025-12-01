@@ -72,7 +72,7 @@ typedef struct {
 } DiceInfo;
 
 /* Functions */
-Yahtzee init_yahtzee(int numPlayers, u_int64_t isAI);
+Yahtzee init_yahtzee(int numPlayers, uint isAI);
 
 void end_yahtzee(Yahtzee y);
 
@@ -85,8 +85,6 @@ bool update_score(const Yahtzee *y, int category);
 void advance_player(Yahtzee *y);
 
 bool is_over(Yahtzee y);
-
-void toggle_dice(Yahtzee *y, u_int8_t toToggle);
 
 DiceInfo get_occurrence_info(const dice_t dice);
 

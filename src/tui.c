@@ -1,4 +1,4 @@
-#include "tui.h"
+#include "../include/tui.h"
 
 #include <assert.h>
 #include <stdlib.h>

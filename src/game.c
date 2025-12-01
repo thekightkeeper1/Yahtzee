@@ -1,16 +1,36 @@
 #include <assert.h>
 #include <stdbool.h>
-#include <stdio.h>
 #include <stdlib.h>
 
-#include "game.h"
+#include "../include/game.h"
 
-// Toggles the dice at the specifi
-void toggle_dice(Yahtzee *y, const u_int8_t toToggle) {
-	// First, check that the wrong bits, the 3 highest, haven't been accidentally used
-	assert(! (toToggle & 0b11100000));
-	y->locked_dice ^= toToggle;
+bool is_continuous(const int occurrences[NUM_DIE_FACES], int start, int length) {
+	assert(start < NUM_DIE_FACES);
+	assert(start + length <= NUM_DIE_FACES);
+
+	for (int face = 0; face < start + length; face++) {
+		if (occurrences[face] == 0) return false;
+	}
+	return true;
 }
+
+// Rolls the dice in the yahtzee game.
+void roll_dice(Yahtzee *y) {
+
+	// Check we can roll, then increment
+	assert(y->currentRoll < MAX_ROLLS); // Game driver should stop this from failing
+	y->currentRoll++;
+
+	// Iterating bits of locked dice, and only rolling the correct ones
+	for (int i = 0; i < 5; i++) {
+		if (~(y->locked_dice >> i) & 0b1) {
+			// If the bit at the ith position from the right is toggled
+			y->dice[i] = 1 + rand() % 6;
+		}
+	}
+	update_ephemeral(y);
+}
+
 
 // Advances to. the next player, wrapping around and incrementing round number too
 // This does NOT, however, do anything other than offer an except when we are already over the number of rounds
@@ -60,7 +80,7 @@ bool update_score(const Yahtzee *y, const int category) {
 	return true;
 }
 
-Yahtzee init_yahtzee(const int numPlayers, u_int64_t isAI) {
+Yahtzee init_yahtzee(const int numPlayers, uint isAI) {
 	const Yahtzee y = {
 
 		.numPlayers = numPlayers,
@@ -96,36 +116,16 @@ void end_yahtzee(const Yahtzee y) {
 	free(y.bufferScore);
 }
 
-// Rolls the dice in the yahtzee game.
-void roll_dice(Yahtzee *y) {
-	// Handles all dice rolling logic, including resetting locked dice if we are on 0 rolls
-	// And advancing the number of rolls
-
-	// Check we can roll, then increment
-	assert(y->currentRoll < MAX_ROLLS); // Game driver should stop this from failing
-	y->currentRoll++;
-	// if (y->currentRoll == 0) y->locked_dice = 0;
-
-	// Iterating bits of locked dice, and only rolling the correct ones
-	for (int i = 0; i < 5; i++) {
-		if (~(y->locked_dice >> i) & 0b1) {
-			// If the bit at the ith position from the right is toggled
-			y->dice[i] = 1 + rand() % 6;
-		}
-	}
-	update_ephemeral(y);
-}
 
 bool has_FULL_HOUSE(const int occurrences[NUM_DIE_FACES]) {
 	// A full house should have exactly 3 of one dice, and 2 of another
-	int three = 0;
-	int two = 0;
+	bool three = false;
+	bool two = false;
 	for (int face = 0; face < NUM_DIE_FACES; face++) {
 		if (occurrences[face] == 2) {
-			//
-			two++;
+			two = true;
 		} else if (occurrences[face] == 3) {
-			three++;
+			three = true;
 		}
 	}
 
@@ -135,33 +135,9 @@ bool has_FULL_HOUSE(const int occurrences[NUM_DIE_FACES]) {
 	return false;
 }
 
-bool is_continuous(const int occurrences[NUM_DIE_FACES], int start, int length) {
-	assert(start < NUM_DIE_FACES);
-	assert(start + length <= NUM_DIE_FACES);
-
-	for (int face = 0; face < start + length; face++) {
-		if (occurrences[face] == 0) return false;
-	}
-	return true;
-}
-
-// Returns whether we have a straight of at least 4
-bool has_LG_STRAIGHT(int occurrences[NUM_DIE_FACES]) {
-	for (int curStart = 0; curStart <= NUM_DIE_FACES - LEN_LG_STRAIGHT; curStart++) {
-		if (is_continuous(occurrences, curStart, LEN_LG_STRAIGHT)) return true;
-	}
-	return false;
-}
-
-// Returns whether we have a straight of at least 4
-bool has_SM_STRAIGHT(int occurrences[NUM_DIE_FACES]) {
-	for (int curStart = 0; curStart <= NUM_DIE_FACES - LEN_SM_STRAIGHT; curStart++) {
-		if (is_continuous(occurrences, curStart, LEN_SM_STRAIGHT)) return true;
-	}
-	return false;
-}
-
-// Returns number of dice repeated, and sets the total to the sum of all faces
+// Computes the score for the of a kind category
+// Returns how many times a face was repeated
+// Also sets the sum of the dice
 int of_a_kind_faces(const int occurrences[NUM_DIE_FACES], int *sum) {
 	*sum = 0;
 	int result = 0;
@@ -273,10 +249,7 @@ u_int8_t best_straight(const dice_t dice, DiceInfo dInfo, int *length) {
 
 		if (cur == prev) {
 			// Skip repeated values
-			i++;
-			continue;
-		}
-		if (prev == cur - 1) { // Increment the length for sequential values
+		} else if (prev == cur - 1) { // Increment the length for sequential values
 			toLock |= 1 << positions[cur-1][0];
 			(*length)++;
 			prev = sorted[i];
@@ -309,19 +282,10 @@ u_int8_t toggle_with_face(const Yahtzee y, const DiceInfo dInfo, const int face)
 	assert (face < NUM_DIE_FACES);
 
 	u_int8_t locked = 0;
-	const int *positions = dInfo.positions[face]; // Array of dices with the face of interest
 	for (int die = 0; die < NUM_DICE; die++) {
-		if ((y.locked_dice >> die) & 1) {
-			// It is locked. Unlock it if we dont care about it
-			if (y.dice[die] != face+1)
-				locked |= 1<<die;
-		} else {
-			// It is not locked, lock it if we care about it
-			if (y.dice[die] == face+1)
-				locked |= 1<<die;
-		}
+		if (y.dice[die] == face+1)
+			locked |= 1<<die;
 	}
-
 	return locked;
 }
 

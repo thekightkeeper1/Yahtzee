@@ -4,8 +4,8 @@
 
 #include <stdlib.h>
 
-#include "game_tui.h"
-#include "tui.h"
+#include "../include/game_tui.h"
+#include "../include/tui.h"
 
 // The labels themselves can be changed for styling. The number and position cannot
 wstr_t CATEGORY_LABELS[NUM_CATEGORIES] = {

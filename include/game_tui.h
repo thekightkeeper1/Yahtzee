@@ -1,7 +1,7 @@
 #if !defined(GAME_TUI_H)
 #define GAME_TUI_H
 
-#include "yahtzee/game.h"
+#include "game.h"
 #include "tui.h"
 
 typedef struct {

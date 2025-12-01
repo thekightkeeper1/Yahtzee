@@ -4,8 +4,8 @@
 #include <stdio.h>
 #include <time.h>
 #include <wchar.h>
-#include "ai.h"
-#include  "game.h"
+#include "../include/ai.h"
+#include "../include/game.h"
 
 
 wstr_t CATEGORY_LABELS[NUM_CATEGORIES] = {
